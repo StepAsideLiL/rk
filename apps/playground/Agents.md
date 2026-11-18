@@ -2,7 +2,7 @@
 
 App for testing, experimenting, and viewing UI inside the rk monorepo. React + Vite + Tailwind CSS.
 
-- Run: `pnpm dev` here, or `pnpm --filter @rk/playground dev` from the repo root. This package intentionally has only a `dev` script.
+- Run: `pnpm dev` here, or `pnpm --filter @rk/playground dev` from the repo root. This package intentionally has only `dev` and `typecheck` scripts; linting and formatting stay repo-wide.
 - Vite root is `src`, so `index.html` lives in `src/`.
 - Theme: shadcn-style oklch tokens in `src/global.css`, exposed as Tailwind utilities (`bg-background`, `text-foreground`, ...). Dark mode is a `dark` class on `<html>`.
 - Theme behavior: defaults to the system theme; pressing `d` toggles light/dark (logic in `src/utils/theme.ts`).

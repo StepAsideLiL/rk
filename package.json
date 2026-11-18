@@ -4,7 +4,8 @@
   "scripts": {
     "lint": "pnpm run lint:fix && oxlint && oxfmt --check",
     "lint:fix": "oxlint --fix && oxfmt --write",
-    "typecheck": "tsc --noEmit -p apps/playground && tsc --noEmit -p packages/ui",
+    "typecheck": "turbo run typecheck",
+    "playground": "pnpm --filter @rk/playground dev",
     "build": "turbo run build",
     "dev": "turbo run dev"
   },

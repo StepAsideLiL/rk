@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": "*node_modules*", "effect": "deny" },
+    { "action": "read", "resource": ".env", "effect": "deny" },
+    { "action": "read", "resource": "*.env.*", "effect": "deny" },
+    { "action": "edit", "resource": "*node_modules*", "effect": "deny" },
+    { "action": "edit", "resource": "pnpm-lock.yaml", "effect": "deny" },
+    { "action": "edit", "resource": "*dist/*", "effect": "deny" },
+    { "action": "edit", "resource": "*.turbo/*", "effect": "deny" }
+  ],
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".turbo/**",
+      "coverage/**"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ rk is a TypeScript monorepo managed with pnpm and Turborepo. Packages live in `a
 | ---------------- | ------------------------------------------------------------------------------ |
 | `pnpm lint`      | Fix lint and formatting, then lint with Oxlint and check formatting with Oxfmt |
 | `pnpm lint:fix`  | Auto-fix lint issues with Oxlint and format files with Oxfmt                   |
-| `pnpm typecheck` | Typecheck with `tsc --noEmit`                                                  |
+| `pnpm typecheck` | Typecheck every package with `tsc --noEmit`                                    |
 | `pnpm build`     | Build all packages (via Turborepo)                                             |
 | `pnpm dev`       | Run dev tasks (via Turborepo)                                                  |
 

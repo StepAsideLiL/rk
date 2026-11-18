@@ -6,6 +6,7 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@rk/ui": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

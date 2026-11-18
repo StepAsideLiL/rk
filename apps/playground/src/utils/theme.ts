@@ -49,5 +49,5 @@ export function useTheme() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [toggle]);
 
-  return { theme, followsSystem };
+  return { theme, followsSystem, toggle };
 }

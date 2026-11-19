@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { Plugin, PluginKey } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
-import { createEditor } from "./create-editor";
-import type { Command, Extension } from "./types";
+import { CONTROLLED_UPDATE_META, createEditor } from "./create-editor";
+import type { Command, Extension, MarkdownCodec } from "./types";
 
 declare module "./types" {
   interface Commands {
@@ -154,5 +154,134 @@ describe("createEditor", () => {
     unsubscribe();
     expect(editor.commands.testCommand()).toBe(true);
     expect(updates).not.toHaveBeenCalled();
+  });
+
+  it("parses JSON string content", () => {
+    const editor = createEditor({
+      extensions: withCommand(() => true),
+      content: JSON.stringify({
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "json" }],
+          },
+        ],
+      }),
+    });
+
+    expect(editor.state.doc.textContent).toBe("json");
+  });
+
+  it("sets content with the controlled-update meta and skips no-ops", () => {
+    const editor = createEditor({ extensions: withCommand(() => true) });
+    const metas: unknown[] = [];
+
+    editor.on("transaction", (transaction) => {
+      metas.push(transaction.getMeta(CONTROLLED_UPDATE_META));
+    });
+
+    const next = {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "next" }] }],
+    };
+
+    editor.setContent(next);
+    expect(editor.state.doc.textContent).toBe("next");
+    expect(metas).toEqual([true]);
+
+    editor.setContent(next);
+    expect(metas).toHaveLength(1);
+  });
+
+  it("ignores content, dispatch and view creation after destroy", () => {
+    const editor = createEditor({ extensions: withCommand(() => true) });
+
+    editor.destroy();
+    editor.setContent({
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "ignored" }] }],
+    });
+    editor.dispatch(editor.state.tr.insertText("ignored"));
+
+    expect(editor.state.doc.textContent).toBe("");
+    expect(() => editor.createView({} as HTMLElement)).toThrow(/destroyed/);
+  });
+
+  it("rejects non-string markdown content when a codec is present", () => {
+    const codec: MarkdownCodec = {
+      parse: () => {
+        throw new Error("should not parse");
+      },
+      serialize: () => "",
+    };
+
+    expect(() =>
+      createEditor({
+        extensions: withCommand(() => true),
+        content: {},
+        contentType: "markdown",
+        markdown: codec,
+      }),
+    ).toThrow(/string content/);
+  });
+
+  it("accepts a ProseMirror node as content", () => {
+    const source = createEditor({ extensions: withCommand(() => true) });
+    const editor = createEditor({
+      extensions: withCommand(() => true),
+      content: source.state.doc,
+    });
+
+    expect(editor.state.doc.eq(source.state.doc)).toBe(true);
+  });
+
+  it("exposes the command registry during extension setup", () => {
+    const reads: unknown[] = [];
+    const extension: Extension<unknown> = {
+      name: "registry-reader",
+      commands(context) {
+        reads.push(
+          context.commands.get("testCommand"),
+          context.commands.has("testCommand"),
+          context.commands.keys(),
+        );
+        return {};
+      },
+    };
+
+    createEditor({
+      extensions: [...withCommand(() => true), extension],
+    });
+
+    expect(reads).toEqual([undefined, false, []]);
+  });
+
+  it("exposes the view but not the state during extension setup", () => {
+    let view: unknown;
+    let stateError: unknown;
+    const extension: Extension<unknown> = {
+      name: "setup-reader",
+      commands(context) {
+        view = context.getView();
+
+        try {
+          context.getState();
+        } catch (error) {
+          stateError = error;
+        }
+
+        return {};
+      },
+    };
+
+    createEditor({
+      extensions: [...withCommand(() => true), extension],
+    });
+
+    expect(view).toBeUndefined();
+    expect(stateError).toMatchObject({
+      message: "Editor state is not available during extension setup.",
+    });
   });
 });

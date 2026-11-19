@@ -1,14 +1,15 @@
 import type { PhrasingContent } from "mdast";
 
 import { defineExtension } from "../../core/types";
+import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
 /** Paragraph textblock and its markdown handlers. */
 export const Paragraph = defineExtension(() => ({
-  name: "paragraph",
+  name: EXTENSION_NAMES.paragraph,
   priority: 20,
-  requires: ["document"],
+  requires: [EXTENSION_NAMES.document],
   nodes: {
-    paragraph: {
+    [NODE_NAMES.paragraph]: {
       group: "block",
       content: "inline*",
       parseDOM: [{ tag: "p" }],
@@ -22,14 +23,14 @@ export const Paragraph = defineExtension(() => ({
           return null;
         }
 
-        const paragraph = state.schema.nodes.paragraph;
+        const paragraph = getNodeType(state.schema, NODE_NAMES.paragraph);
 
         return paragraph ? paragraph.create(null, state.inline(node.children)) : null;
       },
     },
     toMdast: {
       paragraph(node, state) {
-        if (node.type.name !== "paragraph") {
+        if (node.type.name !== NODE_NAMES.paragraph) {
           return null;
         }
 

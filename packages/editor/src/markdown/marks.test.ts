@@ -9,12 +9,13 @@ const schema = new Schema({
     doc: { content: "block+" },
     text: { group: "inline" },
     paragraph: { group: "block", content: "inline*" },
+    hard_break: { inline: true, group: "inline" },
   },
   marks: {
     strong: {},
     emphasis: {},
     code: {},
-    link: { attrs: { href: {}, title: { default: null } } },
+    link: { attrs: { href: { default: "" }, title: { default: null } } },
   },
 });
 
@@ -157,6 +158,91 @@ describe("inlineToMdast", () => {
 
   it("emits unmarked text verbatim", () => {
     expect(inlineToMdast([schema.text("plain")])).toEqual([{ type: "text", value: "plain" }]);
+  });
+});
+
+describe("mark helper edge cases", () => {
+  it("serializes link marks with and without attributes", () => {
+    const link = schema.marks.link;
+
+    if (!link) {
+      throw new Error("Missing link mark.");
+    }
+
+    expect(
+      inlineToMdast([schema.text("a", [link.create({ href: "https://x", title: "T" })])]),
+    ).toEqual([
+      {
+        type: "link",
+        url: "https://x",
+        title: "T",
+        children: [{ type: "text", value: "a" }],
+      },
+    ]);
+
+    expect(inlineToMdast([schema.text("a", [link.create({})])])).toEqual([
+      {
+        type: "link",
+        url: "",
+        title: null,
+        children: [{ type: "text", value: "a" }],
+      },
+    ]);
+  });
+
+  it("merges adjacent inline code spans", () => {
+    const code = schema.marks.code;
+
+    if (!code) {
+      throw new Error("Missing code mark.");
+    }
+
+    expect(
+      inlineToMdast([schema.text("a", [code.create()]), schema.text("b", [code.create()])]),
+    ).toEqual([{ type: "inlineCode", value: "ab" }]);
+  });
+
+  it("delegates and drops non-text nodes through onNode", () => {
+    const hardBreak = schema.nodes.hard_break;
+
+    if (!hardBreak) {
+      throw new Error("Missing hard break node.");
+    }
+
+    expect(
+      inlineToMdast([hardBreak.create()], {
+        onNode: () => [{ type: "break" }],
+      }),
+    ).toEqual([{ type: "break" }]);
+    expect(inlineToMdast([hardBreak.create()], { onNode: () => null })).toEqual([]);
+  });
+
+  it("passes active marks to the unknown-inline callback", () => {
+    const nodes = inlineFromMdast([{ type: "strong", children: [{ type: "break" }] }], schema, {
+      onUnknown: (_node, marks) => [schema.text("!", marks)],
+    });
+
+    expect(nodes[0]?.marks.map((mark) => mark.type.name)).toEqual(["strong"]);
+  });
+
+  it("leaves inline code unmarked when the schema has no code mark", () => {
+    const bare = new Schema({
+      nodes: {
+        doc: { content: "block+" },
+        text: { group: "inline" },
+        paragraph: { group: "block", content: "inline*" },
+      },
+    });
+
+    const nodes = inlineFromMdast([{ type: "inlineCode", value: "x" }], bare);
+
+    expect(nodes[0]?.marks).toEqual([]);
+  });
+
+  it("returns nodes unchanged when applying no marks", () => {
+    const node = { type: "text", value: "x" } as const;
+
+    expect(withMdastMarks(node, [])).toBe(node);
   });
 });
 

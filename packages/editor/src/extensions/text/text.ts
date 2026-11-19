@@ -1,11 +1,12 @@
 import { defineExtension } from "../../core/types";
+import { EXTENSION_NAMES, NODE_NAMES } from "../shared/schema";
 
 /** Inline text node required by every textblock schema. */
 export const Text = defineExtension(() => ({
-  name: "text",
+  name: EXTENSION_NAMES.text,
   priority: 10,
-  requires: ["document"],
+  requires: [EXTENSION_NAMES.document],
   nodes: {
-    text: { group: "inline" },
+    [NODE_NAMES.text]: { group: "inline" },
   },
 }));

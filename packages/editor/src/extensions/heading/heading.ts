@@ -4,6 +4,7 @@ import { textblockTypeInputRule } from "prosemirror-inputrules";
 
 import type { Command, Extension } from "../../core/types";
 import { defineExtension } from "../../core/types";
+import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
 declare module "../../core/types" {
   interface Commands {
@@ -18,7 +19,7 @@ export interface HeadingOptions {
   readonly levels?: readonly number[];
 }
 
-const DEFAULT_LEVELS = [1, 2, 3, 4, 5, 6] as const;
+const DEFAULT_LEVELS: readonly number[] = Object.freeze([1, 2, 3, 4, 5, 6]);
 
 /**
  * Heading textblocks for the configured levels.
@@ -31,11 +32,11 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
   const primaryLevel = levels[0] ?? 1;
 
   return {
-    name: "heading",
+    name: EXTENSION_NAMES.heading,
     priority: 30,
-    requires: ["paragraph"],
+    requires: [EXTENSION_NAMES.paragraph],
     nodes: {
-      heading: {
+      [NODE_NAMES.heading]: {
         attrs: { level: { default: primaryLevel } },
         content: "inline*",
         group: "block",
@@ -48,8 +49,8 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
       },
     },
     commands(context) {
-      const heading = context.schema.nodes.heading;
-      const paragraph = context.schema.nodes.paragraph;
+      const heading = getNodeType(context.schema, NODE_NAMES.heading);
+      const paragraph = getNodeType(context.schema, NODE_NAMES.paragraph);
 
       if (!heading || !paragraph) {
         return {};
@@ -68,7 +69,7 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
       return { setHeading };
     },
     keymap(context) {
-      const heading = context.schema.nodes.heading;
+      const heading = getNodeType(context.schema, NODE_NAMES.heading);
 
       if (!heading) {
         return {};
@@ -85,7 +86,7 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
       return bindings;
     },
     inputRules(context) {
-      const heading = context.schema.nodes.heading;
+      const heading = getNodeType(context.schema, NODE_NAMES.heading);
 
       if (!heading) {
         return [];
@@ -106,7 +107,7 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
             return null;
           }
 
-          const heading = state.schema.nodes.heading;
+          const heading = getNodeType(state.schema, NODE_NAMES.heading);
 
           return heading
             ? heading.create({ level: node.depth }, state.inline(node.children))
@@ -115,7 +116,7 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
       },
       toMdast: {
         heading(node, state) {
-          if (node.type.name !== "heading") {
+          if (node.type.name !== NODE_NAMES.heading) {
             return null;
           }
 

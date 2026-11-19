@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`public API > snapshots the . entry 1`] = `
+[
+  "CONTROLLED_UPDATE_META",
+  "EDITOR_NAME",
+  "MARK_ORDER",
+  "createEditor",
+  "createExtensionManager",
+  "createMarkdownCodec",
+  "defineExtension",
+  "inlineFromMdast",
+  "inlineToMdast",
+  "isMdastMark",
+  "markFromMdast",
+  "withMdastMarks",
+]
+`;
+
+exports[`public API > snapshots the ./extensions entry 1`] = `
+[
+  "Bold",
+  "Document",
+  "EXTENSION_NAMES",
+  "Heading",
+  "Italic",
+  "MARK_NAMES",
+  "NODE_NAMES",
+  "Paragraph",
+  "Text",
+  "getMarkType",
+  "getNodeType",
+  "starterKit",
+]
+`;
+
+exports[`public API > snapshots the ./react entry 1`] = `
+[
+  "EditorContent",
+  "EditorProvider",
+  "createReactNodeView",
+  "shallowEqual",
+  "useEditor",
+  "useEditorState",
+]
+`;
+
+exports[`public API > snapshots the ./testing entry 1`] = `
+[
+  "createTestEditor",
+  "docOf",
+  "press",
+  "roundTrip",
+  "textOf",
+  "typeText",
+]
+`;

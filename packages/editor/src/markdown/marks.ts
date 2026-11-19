@@ -12,7 +12,7 @@ export type MdastMark = Strong | Emphasis | InlineCode | Link;
  * `link` wraps `strong`, which wraps `emphasis`. `code` is a leaf and is
  * emitted as `inlineCode` instead of a parent node.
  */
-export const MARK_ORDER = ["link", "strong", "emphasis", "code"] as const;
+export const MARK_ORDER = Object.freeze(["link", "strong", "emphasis", "code"] as const);
 
 /** Name of a mark handled by the shared mark helpers. */
 export type MarkName = (typeof MARK_ORDER)[number];
@@ -122,7 +122,7 @@ type InlinePart =
   | { readonly kind: "node"; readonly node: Content };
 
 /** Order in which mark parents are nested, outer to inner. */
-const NESTING_ORDER = ["link", "strong", "emphasis"] as const;
+const NESTING_ORDER = Object.freeze(["link", "strong", "emphasis"] as const);
 
 /**
  * Convert ProseMirror inline content into mdast phrasing content.
@@ -219,23 +219,15 @@ function mergeParts(parts: readonly InlinePart[]): InlinePart[] {
 
 /** Whether two mark sets are identical in name and attributes. */
 function sameMarks(left: readonly Mark[], right: readonly Mark[]): boolean {
-  return markKey(left) === markKey(right);
-}
+  if (left === right) {
+    return true;
+  }
 
-/** Stable key for a mark set, used for grouping adjacent text. */
-function markKey(marks: readonly Mark[]): string {
-  return marks
-    .map((mark) => `${mark.type.name}:${attributeKey(mark.attrs)}`)
-    .sort()
-    .join("|");
-}
+  if (left.length !== right.length) {
+    return false;
+  }
 
-/** Stable serialization of mark attributes. */
-function attributeKey(attrs: Record<string, unknown>): string {
-  return Object.keys(attrs)
-    .sort()
-    .map((key) => `${key}=${String(attrs[key])}`)
-    .join(",");
+  return left.every((mark, index) => right[index]?.eq(mark) ?? false);
 }
 
 /** Recursively wrap parts in mark nodes in {@link NESTING_ORDER}. */

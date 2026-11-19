@@ -70,6 +70,43 @@ describe("createExtensionManager", () => {
     ).toThrow('Extension "bold" requires "italic", which is not installed.');
   });
 
+  it("rejects schemas without a doc node", () => {
+    expect(() =>
+      createExtensionManager([
+        extension("paragraph", {
+          nodes: { paragraph: { group: "block", content: "inline*" } },
+        }),
+      ]),
+    ).toThrow(/missing a "doc" node/);
+  });
+
+  it("lets the earlier extension win inside one priority tier", () => {
+    const first = vi.fn(() => true);
+    const second = vi.fn(() => true);
+    const manager = createExtensionManager([
+      documentExtension(),
+      paragraphExtension(),
+      extension("first", { priority: 5, keymap: () => ({ Enter: first }) }),
+      extension("second", { priority: 5, keymap: () => ({ Enter: second }) }),
+    ]);
+    const plugins = manager.createPlugins(testContext(manager.schema));
+    const keymapPlugin = plugins.find((plugin) => typeof plugin.props.handleKeyDown === "function");
+    const state = EditorState.create({ schema: manager.schema });
+    const view = { state, dispatch: vi.fn() } as unknown as EditorView;
+    const event = {
+      key: "Enter",
+      ctrlKey: false,
+      metaKey: false,
+      altKey: false,
+      shiftKey: false,
+      preventDefault: vi.fn(),
+    } as unknown as KeyboardEvent;
+
+    expect(keymapPlugin?.props.handleKeyDown?.call(keymapPlugin, view, event)).toBe(true);
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).not.toHaveBeenCalled();
+  });
+
   it("orders the default block by priority", () => {
     const paragraphFirst = createExtensionManager([
       documentExtension(),

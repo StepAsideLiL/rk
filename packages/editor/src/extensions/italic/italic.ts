@@ -3,6 +3,7 @@ import { toggleMark } from "prosemirror-commands";
 import type { Command } from "../../core/types";
 import { defineExtension } from "../../core/types";
 import { markInputRule } from "../shared/mark-input-rule";
+import { EXTENSION_NAMES, getMarkType, MARK_NAMES } from "../shared/schema";
 
 declare module "../../core/types" {
   interface Commands {
@@ -13,27 +14,27 @@ declare module "../../core/types" {
 
 /** Emphasis mark with its command, key binding and input rule. */
 export const Italic = defineExtension(() => ({
-  name: "italic",
+  name: EXTENSION_NAMES.italic,
   priority: 50,
-  requires: ["text"],
+  requires: [EXTENSION_NAMES.text],
   marks: {
-    emphasis: {
+    [MARK_NAMES.italic]: {
       parseDOM: [{ tag: "em" }, { tag: "i" }],
       toDOM: () => ["em", 0],
     },
   },
   commands(context) {
-    const emphasis = context.schema.marks.emphasis;
+    const emphasis = getMarkType(context.schema, MARK_NAMES.italic);
 
     return emphasis ? { toggleItalic: toggleMark(emphasis) } : {};
   },
   keymap(context): Readonly<Record<string, Command>> {
-    const emphasis = context.schema.marks.emphasis;
+    const emphasis = getMarkType(context.schema, MARK_NAMES.italic);
 
     return emphasis ? { "Mod-i": toggleMark(emphasis) } : {};
   },
   inputRules(context) {
-    const emphasis = context.schema.marks.emphasis;
+    const emphasis = getMarkType(context.schema, MARK_NAMES.italic);
 
     return emphasis ? [markInputRule(/(?<![*_])(?:\*([^*]+)\*|_([^_]+)_)$/, emphasis)] : [];
   },

@@ -17,7 +17,12 @@ import type { UnknownNodeStrategy } from "./types";
  * Development is strict so missing handlers are caught in tests; production
  * keeps unknown content instead of throwing in front of users.
  */
-const DEFAULT_UNKNOWN: UnknownNodeStrategy = import.meta.env.DEV ? "throw" : "preserve";
+const DEFAULT_UNKNOWN: UnknownNodeStrategy = defaultUnknownNodeStrategy(import.meta.env.DEV);
+
+/** Default strategy for a development or production build. */
+export function defaultUnknownNodeStrategy(development: boolean): UnknownNodeStrategy {
+  return development ? "throw" : "preserve";
+}
 
 /**
  * Formatting defaults chosen to be stable and canonical.
@@ -25,11 +30,11 @@ const DEFAULT_UNKNOWN: UnknownNodeStrategy = import.meta.env.DEV ? "throw" : "pr
  * `*` for emphasis/strong and `-` for bullets match the normalization contract,
  * and callers can override any of them through {@link MarkdownCodecConfig.stringify}.
  */
-const STRINGIFY_DEFAULTS = {
+const STRINGIFY_DEFAULTS = Object.freeze({
   emphasis: "*",
   strong: "*",
   bullet: "-",
-} as const satisfies Readonly<RemarkStringifyOptions>;
+} as const satisfies Readonly<RemarkStringifyOptions>);
 
 /** Options shared by the markdown codec. */
 export interface MarkdownCodecConfig {

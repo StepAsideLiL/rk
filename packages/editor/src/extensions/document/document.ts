@@ -1,13 +1,14 @@
 import type { BlockContent } from "mdast";
 
 import { defineExtension } from "../../core/types";
+import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
 /** Root document node and its markdown handlers. */
 export const Document = defineExtension(() => ({
-  name: "document",
+  name: EXTENSION_NAMES.document,
   priority: 0,
   nodes: {
-    doc: { content: "block+" },
+    [NODE_NAMES.document]: { content: "block+" },
   },
   markdown: {
     fromMdast: {
@@ -16,7 +17,7 @@ export const Document = defineExtension(() => ({
           return null;
         }
 
-        const doc = state.schema.nodes.doc;
+        const doc = getNodeType(state.schema, NODE_NAMES.document);
 
         if (!doc) {
           return null;
@@ -27,7 +28,7 @@ export const Document = defineExtension(() => ({
     },
     toMdast: {
       doc(node, state) {
-        if (node.type.name !== "doc") {
+        if (node.type.name !== NODE_NAMES.document) {
           return null;
         }
 

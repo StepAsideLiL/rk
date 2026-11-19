@@ -13,6 +13,15 @@ export { Heading, type HeadingOptions } from "./heading/heading";
 export { Italic } from "./italic/italic";
 export { Paragraph } from "./paragraph/paragraph";
 export { Text } from "./text/text";
+export {
+  EXTENSION_NAMES,
+  getMarkType,
+  getNodeType,
+  MARK_NAMES,
+  NODE_NAMES,
+  type MarkName,
+  type NodeName,
+} from "./shared/schema";
 
 /**
  * The default extension set: document, text, paragraph, heading, bold and

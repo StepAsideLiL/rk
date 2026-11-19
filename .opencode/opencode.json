@@ -12,5 +12,8 @@
   ],
   "watcher": {
     "ignore": ["node_modules/**", "dist/**", ".turbo/**", "coverage/**"]
+  },
+  "compaction": {
+    "auto": true
   }
 }

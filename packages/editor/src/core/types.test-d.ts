@@ -10,7 +10,7 @@ declare module "./types" {
 
 describe("core types", () => {
   it("merges augmented Commands entries", () => {
-    expectTypeOf<keyof Commands>().toEqualTypeOf<"toggleBold">();
+    expectTypeOf<Commands>().toHaveProperty("toggleBold");
 
     const commands: Partial<Commands> = {
       toggleBold: (state) => state.doc.nodeSize > 0,

@@ -165,7 +165,14 @@ export interface Extension<Options = void> {
   /** Unique extension name, used by {@link Extension.requires}. */
   readonly name: string;
 
-  /** Ordering hint: higher values are applied before lower ones. */
+  /**
+   * Ordering hint, default 100.
+   *
+   * Extensions are merged into the schema in ascending order, so a block node
+   * with the lowest value (typically paragraph at 0) becomes the default block.
+   * Keymaps and input rules are evaluated in descending order, so higher values
+   * win key and rule conflicts.
+   */
   readonly priority?: number;
 
   /** Names of extensions that must also be present. */

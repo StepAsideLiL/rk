@@ -82,6 +82,9 @@ export interface Editor {
   /** Destroy the view and release every listener and plugin resource. */
   destroy(): void;
 
+  /** Apply a transaction to the editor, updating state and view. */
+  dispatch(transaction: Transaction): void;
+
   /** Serialize the current document to markdown using the injected codec. */
   getMarkdown(): string;
 
@@ -201,6 +204,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
     commands,
     can,
     destroy,
+    dispatch: applyTransaction,
     getMarkdown,
     on: emitter.on,
   };

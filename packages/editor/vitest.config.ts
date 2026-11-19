@@ -7,6 +7,7 @@ export default defineConfig({
         test: {
           name: "node",
           environment: "node",
+          exclude: ["**/node_modules/**", "**/dist/**", "**/*.dom.test.{ts,tsx}"],
           include: [
             "src/core/**/*.test.ts",
             "src/markdown/**/*.test.ts",

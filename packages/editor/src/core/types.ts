@@ -240,10 +240,13 @@ export type ExtensionFactory<Options> = (options: Options) => Extension<Options>
  * Identity helper for declaring an extension factory.
  *
  * The implementation returns `factory` unchanged; its only job is to infer and
- * preserve the options type so callers get the same signature back.
+ * preserve the options type so callers get the same signature back. Factories
+ * without options are returned as zero-argument functions.
  */
+export function defineExtension(factory: () => Extension): () => Extension;
 export function defineExtension<Options>(
-  factory: ExtensionFactory<Options>,
-): ExtensionFactory<Options> {
+  factory: (options: Options) => Extension<Options>,
+): (options: Options) => Extension<Options>;
+export function defineExtension(factory: unknown): unknown {
   return factory;
 }

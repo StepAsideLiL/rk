@@ -1,5 +1,6 @@
 import type {
   BlockContent,
+  Root,
   RootContent as Content,
   PhrasingContent,
   Text as MdastText,
@@ -91,11 +92,11 @@ export interface MarkdownState<TBlock, TInline, TText, TOutput> {
   /** The schema the conversion runs against. */
   readonly schema: Schema;
 
-  /** Convert a block-level source node and its children. */
-  block(node: TBlock): TOutput[];
+  /** Convert block-level source nodes and their children. */
+  block(nodes: readonly TBlock[]): TOutput[];
 
-  /** Convert an inline source node and its children. */
-  inline(node: TInline): TOutput[];
+  /** Convert inline source nodes and their children. */
+  inline(nodes: readonly TInline[]): TOutput[];
 
   /** Convert a text source node. */
   text(node: TText): TOutput;
@@ -119,11 +120,13 @@ export type ToMdastState = MarkdownState<PmNode, PmNode, PmNode, Content>;
 /**
  * Convert one mdast node into ProseMirror content.
  *
- * Return `null` to let the pipeline fall back to its default handling. Handlers
- * are registered per mdast node `type` in {@link MarkdownContributions}.
+ * The `root` node is included so a document extension can handle it with the
+ * same signature. Return `null` to let the pipeline fall back to the configured
+ * unknown-node strategy. Handlers are registered per mdast node `type` in
+ * {@link MarkdownContributions}.
  */
 export type MdastHandler = (
-  node: Content,
+  node: Root | Content,
   state: FromMdastState,
 ) => PmNode | readonly PmNode[] | null;
 
@@ -151,6 +154,21 @@ export interface MarkdownContributions {
 
   /** Handlers keyed by ProseMirror node type, used when serializing markdown. */
   readonly toMdast?: Readonly<Record<string, PmHandler>>;
+}
+
+/**
+ * Markdown conversion pipeline injected into the editor.
+ *
+ * Core owns no markdown dependency: the markdown module implements this
+ * interface and `createEditor` uses it for `contentType: "markdown"` and
+ * `editor.getMarkdown()`.
+ */
+export interface MarkdownCodec {
+  /** Parse markdown into a ProseMirror document for the given schema. */
+  parse(markdown: string, schema: Schema): PmNode;
+
+  /** Serialize a ProseMirror document to markdown. */
+  serialize(doc: PmNode): string;
 }
 
 /**

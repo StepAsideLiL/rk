@@ -1,0 +1,97 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mdast snapshots > snapshots the mdast produced for **a *b* c** 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "type": "text",
+              "value": "a ",
+            },
+            {
+              "children": [
+                {
+                  "type": "text",
+                  "value": "b",
+                },
+              ],
+              "type": "emphasis",
+            },
+            {
+              "type": "text",
+              "value": " c",
+            },
+          ],
+          "type": "strong",
+        },
+      ],
+      "type": "paragraph",
+    },
+  ],
+  "type": "root",
+}
+`;
+
+exports[`mdast snapshots > snapshots the mdast produced for **a \`b\` c** 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "type": "text",
+              "value": "a ",
+            },
+            {
+              "type": "inlineCode",
+              "value": "b",
+            },
+            {
+              "type": "text",
+              "value": " c",
+            },
+          ],
+          "type": "strong",
+        },
+      ],
+      "type": "paragraph",
+    },
+  ],
+  "type": "root",
+}
+`;
+
+exports[`mdast snapshots > snapshots the mdast produced for **a***b* 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "type": "text",
+              "value": "a",
+            },
+          ],
+          "type": "strong",
+        },
+        {
+          "children": [
+            {
+              "type": "text",
+              "value": "b",
+            },
+          ],
+          "type": "emphasis",
+        },
+      ],
+      "type": "paragraph",
+    },
+  ],
+  "type": "root",
+}
+`;

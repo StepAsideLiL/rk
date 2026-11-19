@@ -5,7 +5,14 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { createExtensionManager } from "./extension-manager";
-import type { Command, CommandRegistry, Commands, Extension, ExtensionContext } from "./types";
+import type {
+  Command,
+  CommandRegistry,
+  Commands,
+  Extension,
+  ExtensionContext,
+  MarkdownCodec,
+} from "./types";
 
 /** Content accepted by {@link createEditor}. */
 export type EditorContent = PmNode | string | { readonly [key: string]: unknown };
@@ -26,6 +33,12 @@ export interface CreateEditorOptions {
 
   /** Mount the editable view into this element. Omit for headless use. */
   readonly element?: HTMLElement;
+
+  /**
+   * Markdown codec from the markdown module. Required for markdown content and
+   * for {@link Editor.getMarkdown}; core never imports that module directly.
+   */
+  readonly markdown?: MarkdownCodec;
 }
 
 /** A command bound to an editor: state and dispatch are already applied. */
@@ -69,6 +82,9 @@ export interface Editor {
   /** Destroy the view and release every listener and plugin resource. */
   destroy(): void;
 
+  /** Serialize the current document to markdown using the injected codec. */
+  getMarkdown(): string;
+
   /** Subscribe to an editor event. Returns an unsubscribe function. */
   on<Event extends keyof EditorEvents>(
     event: Event,
@@ -86,6 +102,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
   const manager = createExtensionManager(options.extensions);
   const emitter = createEmitter();
   const registry = createCommandRegistry();
+  const codec = options.markdown;
 
   let state: EditorState | undefined;
   let view: EditorView | undefined;
@@ -110,7 +127,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
   registry.register(contributed);
 
   const plugins = manager.createPlugins(context);
-  const doc = resolveContent(options.content, options.contentType, manager.schema);
+  const doc = resolveContent(options.content, options.contentType, manager.schema, codec);
   state = EditorState.create({ schema: manager.schema, doc, plugins });
 
   if (options.element) {
@@ -163,6 +180,16 @@ export function createEditor(options: CreateEditorOptions): Editor {
     emitter.clear();
   }
 
+  function getMarkdown(): string {
+    if (!codec) {
+      throw new Error(
+        "No markdown codec was provided to createEditor. Pass the codec from createMarkdownCodec().",
+      );
+    }
+
+    return codec.serialize(currentState().doc);
+  }
+
   return {
     get view() {
       return view;
@@ -174,6 +201,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
     commands,
     can,
     destroy,
+    getMarkdown,
     on: emitter.on,
   };
 }
@@ -183,6 +211,7 @@ function resolveContent(
   content: EditorContent | undefined,
   contentType: EditorContentType | undefined,
   schema: Schema,
+  codec: MarkdownCodec | undefined,
 ): PmNode {
   if (content === undefined) {
     const doc = schema.topNodeType.createAndFill();
@@ -199,7 +228,17 @@ function resolveContent(
   }
 
   if ((contentType ?? "json") === "markdown") {
-    throw new Error("Markdown content is not parsed by core yet. Pass JSON or a ProseMirror node.");
+    if (!codec) {
+      throw new Error(
+        'contentType "markdown" requires a markdown codec from createMarkdownCodec().',
+      );
+    }
+
+    if (typeof content !== "string") {
+      throw new Error('contentType "markdown" requires string content.');
+    }
+
+    return codec.parse(content, schema);
   }
 
   return schema.nodeFromJSON(typeof content === "string" ? JSON.parse(content) : content);

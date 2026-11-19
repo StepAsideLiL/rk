@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@rk/editor": ["./src/index.ts"],
+      "@rk/editor/react": ["./src/react/index.ts"],
+      "@rk/editor/extensions": ["./src/extensions/index.ts"],
+      "@rk/editor/testing": ["./src/testing/index.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "playground",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "oxlint.config.ts",
+    "oxfmt.config.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

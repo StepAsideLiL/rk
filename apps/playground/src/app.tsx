@@ -7,9 +7,7 @@ export default function App() {
 
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center gap-8">
-      <h1 className="text-center text-6xl font-bold tracking-tight">
-        Hello, Playground
-      </h1>
+      <h1 className="text-center text-6xl font-bold tracking-tight">Hello, Playground</h1>
       <ThemeToggleButton
         aria-label="Dark theme"
         pressed={dark}

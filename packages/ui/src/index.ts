@@ -1,4 +1,1 @@
-export {
-  themeToggleButton,
-  type ThemeToggleButtonOptions,
-} from "./primitive/theme-toggle-button";
+export { themeToggleButton, type ThemeToggleButtonOptions } from "./primitive/theme-toggle-button";

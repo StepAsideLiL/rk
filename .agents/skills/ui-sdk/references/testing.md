@@ -76,11 +76,7 @@ import { expect, test } from "vitest";
 import { stepper } from "./stepper";
 
 test("arrows move between steps and Enter opens one", async () => {
-  const view = mount(
-    stepper,
-    {},
-    `<root><step value="a">A</step><step value="b">B</step></root>`,
-  );
+  const view = mount(stepper, {}, `<root><step value="a">A</step><step value="b">B</step></root>`);
   try {
     await view.keys("Tab", "ArrowRight", "Enter");
     expect(view.state.value).toBe("b");
@@ -150,10 +146,7 @@ Assign these rather than using `??=`: jsdom has some of them without the parts t
 const tools = new Map<string, { execute: (input: object) => unknown }>();
 Object.assign(document, {
   modelContext: {
-    registerTool: async (tool: {
-      name: string;
-      execute: (input: object) => unknown;
-    }) => {
+    registerTool: async (tool: { name: string; execute: (input: object) => unknown }) => {
       tools.set(tool.name, tool);
     },
   },

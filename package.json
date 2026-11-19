@@ -1,17 +1,17 @@
 {
   "name": "rk",
   "private": true,
+  "type": "module",
   "scripts": {
-    "lint": "pnpm run lint:fix && oxlint && oxfmt --check",
-    "lint:fix": "oxlint --fix && oxfmt --write",
+    "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "playground": "pnpm --filter @rk/playground dev",
     "build": "turbo run build",
     "dev": "turbo run dev"
   },
   "devDependencies": {
-    "oxfmt": "^0.79.0",
-    "oxlint": "^1.94.0",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
     "turbo": "^2.11.12",
     "typescript": "catalog:"
   },

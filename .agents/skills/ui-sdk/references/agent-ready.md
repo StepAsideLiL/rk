@@ -54,8 +54,7 @@ Create the bridge once, in the browser, from the same package as the components:
 import { agentTools, createAgent, registerTools } from "@ui-sdk/react/agent";
 
 const agent = createAgent({
-  allow: (step, { signal }) =>
-    step.confirm ? askThePerson(step.confirm, { signal }) : true,
+  allow: (step, { signal }) => (step.confirm ? askThePerson(step.confirm, { signal }) : true),
 });
 
 export { agent };
@@ -85,10 +84,7 @@ test("an agent can find and change every setting", async () => {
     .snapshot()
     .filter((entry) => !entry.offPage && entry.component !== "more");
   for (const entry of components) {
-    expect(
-      entry.label,
-      `${entry.component} ${entry.ref} has no name`,
-    ).toBeTruthy();
+    expect(entry.label, `${entry.component} ${entry.ref} has no name`).toBeTruthy();
   }
   const labels = components.map((entry) => entry.label);
   for (const label of ["Project name", "Visibility", "Weekly digest"]) {
@@ -102,9 +98,7 @@ test("an agent can find and change every setting", async () => {
     ],
   });
   expect(result.ok, result.error?.message).toBe(true);
-  expect(screen.getByLabelText<HTMLInputElement>("Project name").value).toBe(
-    "Atlas",
-  );
+  expect(screen.getByLabelText<HTMLInputElement>("Project name").value).toBe("Atlas");
 });
 ```
 
@@ -118,9 +112,7 @@ test("an agent can find and change every setting", async () => {
   let approve = false;
   const agent = createAgent({ allow: (step) => !step.confirm || approve });
   const remove = {
-    steps: [
-      { ref: "Delete project", action: "press", args: ["Delete forever"] },
-    ],
+    steps: [{ ref: "Delete project", action: "press", args: ["Delete forever"] }],
   };
 
   expect((await agent.act(remove)).ok).toBe(false);

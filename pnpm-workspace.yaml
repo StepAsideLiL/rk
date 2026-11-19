@@ -24,3 +24,5 @@ catalog:
   tailwindcss: ^4.3.5
   "@tailwindcss/vite": ^4.3.5
   typescript: ^7.0.2
+  oxlint: ^1.94.0
+  oxfmt: ^0.79.0

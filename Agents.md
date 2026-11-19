@@ -1,6 +1,6 @@
 # rk
 
-rk is a TypeScript monorepo managed with pnpm and Turborepo. Packages live in `apps/*` and `packages/*`. Oxc handles linting and formatting; shared TypeScript settings live in the root `tsconfig.json`.
+rk is a TypeScript monorepo managed with pnpm and Turborepo. Packages live in `apps/*` and `packages/*`. Oxc handles linting and formatting, configured in the root `oxlint.config.ts` and `oxfmt.config.ts`; shared TypeScript settings live in the root `tsconfig.json`. Each package carries its own `lint`, `lint:fix`, and `typecheck` scripts, which Turborepo runs.
 
 ## Commands
 

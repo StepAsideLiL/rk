@@ -33,9 +33,7 @@ const roving = createRovingFocus<State, CellProps>(context, {
       } as Record<string, [number, number]>
     )[event.key];
     if (!to) return undefined;
-    return rows[to[0]] && columns[to[1]]
-      ? cellKey(rows[to[0]].id, columns[to[1]].id)
-      : from.key;
+    return rows[to[0]] && columns[to[1]] ? cellKey(rows[to[0]].id, columns[to[1]].id) : from.key;
   },
 });
 ```
@@ -83,16 +81,13 @@ Storing the derived arrays, rather than computing them in a slot's `state`, is t
 
 ```ts
 type SelectionReason = "item-press" | "list-navigation" | "select-all";
-const selection = createSelection<Options, State, "selected", SelectionReason>(
-  context,
-  {
-    key: "selected",
-    set: (selected) => (store.set({ selected }), true),
-    order: () => store.get().ids,
-    multiple: () => true,
-    selectable: (id) => !itemById(id)?.disabled,
-  },
-);
+const selection = createSelection<Options, State, "selected", SelectionReason>(context, {
+  key: "selected",
+  set: (selected) => (store.set({ selected }), true),
+  order: () => store.get().ids,
+  multiple: () => true,
+  selectable: (id) => !itemById(id)?.disabled,
+});
 ```
 
 Clicks map to it like this. `press` gets the click, so read its modifiers:
@@ -200,10 +195,7 @@ const recovery = createFocusRecovery<{ value: string; list: string }>({
 });
 // Bind it next to the roving group in the item slot:
 bind: (el, part) => {
-  const cleanups = [
-    part.api.roving.bind(el, part),
-    part.api.recovery.bind(el, part),
-  ];
+  const cleanups = [part.api.roving.bind(el, part), part.api.recovery.bind(el, part)];
   return () => cleanups.forEach((cleanup) => cleanup());
 };
 ```
@@ -237,10 +229,7 @@ Declare them in the callback's type, with a one-line comment naming which aren't
 
 ```ts
 // "select-all" isn't in the shared vocabulary.
-export type DataGridValueChangeReason =
-  | "item-press"
-  | "list-navigation"
-  | "select-all";
+export type DataGridValueChangeReason = "item-press" | "list-navigation" | "select-all";
 ```
 
 ## Stepper

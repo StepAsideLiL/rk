@@ -2,9 +2,6 @@
   "name": "@rk/ui",
   "private": true,
   "type": "module",
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -15,12 +12,21 @@
       "default": "./src/react/index.ts"
     }
   },
-  "peerDependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
+  "scripts": {
+    "lint": "pnpm run lint:fix && oxlint && oxfmt --check",
+    "lint:fix": "oxlint --fix && oxfmt --write",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ui-sdk/core": "0.1.0-beta.10",
     "@ui-sdk/react": "0.1.0-beta.10"
+  },
+  "devDependencies": {
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

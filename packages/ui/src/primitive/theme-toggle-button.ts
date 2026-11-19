@@ -1,8 +1,4 @@
-import {
-  createChange,
-  definePrimitive,
-  type ChangeDetails,
-} from "@ui-sdk/core";
+import { createChange, definePrimitive, type ChangeDetails } from "@ui-sdk/core";
 
 type ThemeToggleButtonOptions = {
   pressed?: boolean;
@@ -21,8 +17,7 @@ const themeToggleButton = definePrimitive({
   state: (options: ThemeToggleButtonOptions) => ({
     pressed: options.defaultPressed ?? false,
   }),
-  sync: (options) =>
-    options.pressed === undefined ? {} : { pressed: options.pressed },
+  sync: (options) => (options.pressed === undefined ? {} : { pressed: options.pressed }),
   api: (context) => {
     const change = createChange(context);
     return {

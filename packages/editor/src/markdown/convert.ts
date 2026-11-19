@@ -104,6 +104,10 @@ function createFromMdastState(
     },
     inline(nodes) {
       return inlineFromMdast(nodes, schema, {
+        markFromMdast(node) {
+          const handler = handlers.markFromMdast[node.type];
+          return handler ? handler(node as Content, schema) : null;
+        },
         onUnknown(node, marks) {
           const handler = handlers.fromMdast[node.type];
 
@@ -143,6 +147,7 @@ function createToMdastState(
     },
     inline(nodes) {
       return inlineToMdast(nodes, {
+        markToMdast: handlers.markToMdast,
         onNode(node) {
           return convertPmNode(node, state, handlers, strategy);
         },

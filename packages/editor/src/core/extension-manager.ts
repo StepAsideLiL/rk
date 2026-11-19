@@ -8,7 +8,15 @@ import type { Plugin } from "prosemirror-state";
 import type { NodeViewConstructor } from "prosemirror-view";
 import type { Plugin as UnifiedPlugin } from "unified";
 
-import type { Command, Extension, ExtensionContext, MdastHandler, PmHandler } from "./types";
+import type {
+  Command,
+  Extension,
+  ExtensionContext,
+  MdastHandler,
+  MdastMarkHandler,
+  PmHandler,
+  PmMarkHandler,
+} from "./types";
 
 /** Priority used when an extension does not specify one. */
 const DEFAULT_PRIORITY = 100;
@@ -25,6 +33,12 @@ export interface CollectedMarkdown {
 
   /** Handlers keyed by ProseMirror node type. */
   readonly toMdast: Readonly<Record<string, PmHandler>>;
+
+  /** Mark parsers keyed by mdast node type. */
+  readonly markFromMdast: Readonly<Record<string, MdastMarkHandler>>;
+
+  /** Mark serializers keyed by ProseMirror mark name. */
+  readonly markToMdast: Readonly<Record<string, PmMarkHandler>>;
 
   /** unified/remark plugins merged from every extension. */
   readonly remarkPlugins: readonly UnifiedPlugin[];
@@ -152,6 +166,8 @@ function mergeSchema(extensions: readonly Extension<unknown>[]): Schema {
 function collectMarkdown(extensions: readonly Extension<unknown>[]): CollectedMarkdown {
   const fromMdast: Record<string, MdastHandler> = {};
   const toMdast: Record<string, PmHandler> = {};
+  const markFromMdast: Record<string, MdastMarkHandler> = {};
+  const markToMdast: Record<string, PmMarkHandler> = {};
   const remarkPlugins: UnifiedPlugin[] = [];
 
   for (const extension of extensions) {
@@ -163,13 +179,21 @@ function collectMarkdown(extensions: readonly Extension<unknown>[]): CollectedMa
 
     Object.assign(fromMdast, markdown.fromMdast ?? {});
     Object.assign(toMdast, markdown.toMdast ?? {});
+    Object.assign(markFromMdast, markdown.markFromMdast ?? {});
+    Object.assign(markToMdast, markdown.markToMdast ?? {});
 
     if (markdown.remarkPlugins) {
       remarkPlugins.push(...markdown.remarkPlugins);
     }
   }
 
-  return { fromMdast, toMdast, remarkPlugins };
+  return {
+    fromMdast,
+    toMdast,
+    markFromMdast,
+    markToMdast,
+    remarkPlugins,
+  };
 }
 
 /** Merge node views in priority order, letting higher priorities win. */

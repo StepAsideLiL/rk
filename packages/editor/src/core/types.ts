@@ -139,6 +139,23 @@ export type MdastHandler = (
 export type PmHandler = (node: PmNode, state: ToMdastState) => Content | readonly Content[] | null;
 
 /**
+ * Convert one mdast mark node into a ProseMirror mark.
+ *
+ * Registered under {@link MarkdownContributions.markFromMdast} by mdast node
+ * type, so extensions can support marks beyond the built-in
+ * strong/emphasis/code/link set.
+ */
+export type MdastMarkHandler = (node: Content, schema: Schema) => Mark | null;
+
+/**
+ * Serialize a ProseMirror mark to mdast.
+ *
+ * Registered under {@link MarkdownContributions.markToMdast} by mark name. The
+ * handler receives the serialized children and returns the wrapper node.
+ */
+export type PmMarkHandler = (mark: Mark, children: readonly Content[]) => Content;
+
+/**
  * Markdown contributions attached to an extension.
  *
  * The pipeline is registry based: each extension names the mdast and
@@ -154,6 +171,12 @@ export interface MarkdownContributions {
 
   /** Handlers keyed by ProseMirror node type, used when serializing markdown. */
   readonly toMdast?: Readonly<Record<string, PmHandler>>;
+
+  /** Mark parsers keyed by mdast node type (for extension-defined marks). */
+  readonly markFromMdast?: Readonly<Record<string, MdastMarkHandler>>;
+
+  /** Mark serializers keyed by ProseMirror mark name. */
+  readonly markToMdast?: Readonly<Record<string, PmMarkHandler>>;
 }
 
 /**

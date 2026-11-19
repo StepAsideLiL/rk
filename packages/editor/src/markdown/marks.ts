@@ -2,6 +2,7 @@ import type { Emphasis, InlineCode, Link, PhrasingContent, Strong } from "mdast"
 import type { Mark, Node as PmNode, Schema } from "prosemirror-model";
 
 import type { Content } from "mdast";
+import type { PmMarkHandler } from "../core/types";
 
 /** mdast nodes that map to a ProseMirror mark. */
 export type MdastMark = Strong | Emphasis | InlineCode | Link;
@@ -58,6 +59,9 @@ export type UnknownMdastInline = (node: PhrasingContent, marks: readonly Mark[])
 export interface InlineFromMdastOptions {
   /** Called for inline nodes that are neither text nor a known mark wrapper. */
   readonly onUnknown?: UnknownMdastInline;
+
+  /** Custom mark parser keyed by mdast node type. */
+  readonly markFromMdast?: (node: PhrasingContent) => Mark | null;
 }
 
 /**
@@ -94,6 +98,18 @@ export function inlineFromMdast(
         continue;
       }
 
+      const custom = options.markFromMdast?.(node);
+
+      if (custom) {
+        if ("children" in node && Array.isArray(node.children)) {
+          visit(node.children as PhrasingContent[], [...marks, custom]);
+        } else if ("value" in node && typeof node.value === "string") {
+          result.push(schema.text(node.value, [...marks, custom]));
+        }
+
+        continue;
+      }
+
       const replaced = options.onUnknown?.(node, marks);
       if (replaced) {
         result.push(...replaced);
@@ -109,6 +125,9 @@ export type ConvertPmInlineNode = (node: PmNode) => Content[] | null;
 export interface InlineToMdastOptions {
   /** Called for non-text ProseMirror nodes. */
   readonly onNode?: ConvertPmInlineNode;
+
+  /** Custom mark serializers keyed by ProseMirror mark name. */
+  readonly markToMdast?: Readonly<Record<string, PmMarkHandler>>;
 }
 
 /** One piece of inline content before mark nesting is reconstructed. */
@@ -162,7 +181,15 @@ export function inlineToMdast(
   }
 
   const result: Content[] = [];
-  build(mergeParts(parts), 0, result);
+  const custom = options.markToMdast ?? {};
+  const order = Object.freeze([
+    ...NESTING_ORDER,
+    ...Object.keys(custom).filter(
+      (name) => name !== "code" && !(NESTING_ORDER as readonly string[]).includes(name),
+    ),
+  ]);
+
+  build(mergeParts(parts), 0, result, order, custom);
   return result;
 }
 
@@ -177,7 +204,7 @@ export function withMdastMarks(node: Content, marks: readonly Mark[]): Content {
   }
 
   const result: Content[] = [];
-  build([{ kind: "text", value: node.value, marks }], 0, result);
+  build([{ kind: "text", value: node.value, marks }], 0, result, NESTING_ORDER, {});
 
   return result[0] ?? node;
 }
@@ -230,9 +257,15 @@ function sameMarks(left: readonly Mark[], right: readonly Mark[]): boolean {
   return left.every((mark, index) => right[index]?.eq(mark) ?? false);
 }
 
-/** Recursively wrap parts in mark nodes in {@link NESTING_ORDER}. */
-function build(parts: readonly InlinePart[], depth: number, out: Content[]): void {
-  if (depth === NESTING_ORDER.length) {
+/** Recursively wrap parts in mark nodes in nesting order. */
+function build(
+  parts: readonly InlinePart[],
+  depth: number,
+  out: Content[],
+  order: readonly string[],
+  serializers: Readonly<Record<string, PmMarkHandler>>,
+): void {
+  if (depth === order.length) {
     for (const part of parts) {
       out.push(leaf(part));
     }
@@ -240,7 +273,7 @@ function build(parts: readonly InlinePart[], depth: number, out: Content[]): voi
     return;
   }
 
-  const name = NESTING_ORDER[depth];
+  const name = order[depth];
 
   if (!name) {
     return;
@@ -270,13 +303,13 @@ function build(parts: readonly InlinePart[], depth: number, out: Content[]): voi
     }
 
     if (!marked) {
-      build(run, depth + 1, out);
+      build(run, depth + 1, out, order, serializers);
       continue;
     }
 
     const children: Content[] = [];
-    build(run, depth + 1, children);
-    out.push(markParent(name, run, children));
+    build(run, depth + 1, children, order, serializers);
+    out.push(markParent(name, run, children, serializers));
   }
 }
 
@@ -294,9 +327,10 @@ function leaf(part: InlinePart): Content {
 
 /** Build a mark parent for a run of parts. */
 function markParent(
-  name: (typeof NESTING_ORDER)[number],
+  name: string,
   run: readonly InlinePart[],
   children: readonly Content[],
+  serializers: Readonly<Record<string, PmMarkHandler>>,
 ): Content {
   if (name === "link") {
     const mark = findMark(run, "link");
@@ -311,11 +345,22 @@ function markParent(
     };
   }
 
-  return { type: name, children: children as PhrasingContent[] };
+  if (name === "strong" || name === "emphasis") {
+    return { type: name, children: children as PhrasingContent[] };
+  }
+
+  const mark = findMark(run, name);
+  const serializer = serializers[name];
+
+  if (!mark || !serializer) {
+    throw new Error(`No mdast serializer registered for mark "${name}".`);
+  }
+
+  return serializer(mark, children);
 }
 
 /** Find a mark by name among text-like parts. */
-function findMark(run: readonly InlinePart[], name: MarkName): Mark | undefined {
+function findMark(run: readonly InlinePart[], name: string): Mark | undefined {
   for (const part of run) {
     if (part.kind === "node") {
       continue;
@@ -332,7 +377,7 @@ function findMark(run: readonly InlinePart[], name: MarkName): Mark | undefined 
 }
 
 /** Whether a part carries a given mark. */
-function partHasMark(part: InlinePart, name: MarkName): boolean {
+function partHasMark(part: InlinePart, name: string): boolean {
   if (part.kind === "node") {
     return false;
   }
@@ -341,6 +386,6 @@ function partHasMark(part: InlinePart, name: MarkName): boolean {
 }
 
 /** Whether a mark set contains a mark name. */
-function hasMark(marks: readonly Mark[], name: MarkName): boolean {
+function hasMark(marks: readonly Mark[], name: string): boolean {
   return marks.some((mark) => mark.type.name === name);
 }

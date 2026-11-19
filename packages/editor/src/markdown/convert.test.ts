@@ -20,6 +20,8 @@ const root = (children: Root["children"]): Root => ({ type: "root", children });
 const emptyHandlers: CollectedMarkdown = {
   fromMdast: {},
   toMdast: {},
+  markFromMdast: {},
+  markToMdast: {},
   remarkPlugins: [],
 };
 
@@ -193,6 +195,8 @@ describe("toMdastRoot", () => {
     });
     const handlers: CollectedMarkdown = {
       fromMdast: {},
+      markFromMdast: {},
+      markToMdast: {},
       remarkPlugins: [],
       toMdast: {
         doc: (node, state) => state.block(node.content.content),

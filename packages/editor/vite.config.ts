@@ -16,7 +16,7 @@ export default defineConfig({
     react(),
     dts({
       include: ["src"],
-      exclude: ["**/*.test.*", "**/*.test-d.ts", "**/*.test-utils.ts", "**/setup-dom.ts"],
+      exclude: ["**/*.test.*", "**/*.test-d.ts", "**/*.test-utils.*", "**/setup-dom.ts"],
       bundleTypes: false,
     }),
   ],

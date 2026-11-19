@@ -62,6 +62,9 @@ export interface EditorEvents {
 /** Removes a listener previously registered with {@link Editor.on}. */
 export type Unsubscribe = () => void;
 
+/** Transaction meta key for content set from outside the editor. */
+export const CONTROLLED_UPDATE_META = "rk-editor:controlled-update";
+
 /** A live editor instance. */
 export interface Editor {
   /** The mounted ProseMirror view, or `undefined` in headless mode. */
@@ -79,6 +82,12 @@ export interface Editor {
   /** Dry-run versions of the commands: they never dispatch. */
   readonly can: BoundCommands;
 
+  /** Create and mount a view for this editor, replacing any existing view. */
+  createView(element: HTMLElement): EditorView;
+
+  /** Destroy the attached view without destroying the editor itself. */
+  destroyView(): void;
+
   /** Destroy the view and release every listener and plugin resource. */
   destroy(): void;
 
@@ -87,6 +96,15 @@ export interface Editor {
 
   /** Serialize the current document to markdown using the injected codec. */
   getMarkdown(): string;
+
+  /**
+   * Replace the document from outside the editor.
+   *
+   * Skips no-op updates and marks the transaction with
+   * {@link CONTROLLED_UPDATE_META}, so controlled React content does not echo
+   * back through `onChange`.
+   */
+  setContent(content: EditorContent, contentType?: EditorContentType): void;
 
   /** Subscribe to an editor event. Returns an unsubscribe function. */
   on<Event extends keyof EditorEvents>(
@@ -134,11 +152,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
   state = EditorState.create({ schema: manager.schema, doc, plugins });
 
   if (options.element) {
-    view = new EditorView(options.element, {
-      state,
-      dispatchTransaction: (transaction) => applyTransaction(transaction),
-      nodeViews: manager.nodeViews,
-    });
+    createView(options.element);
   }
 
   const commands = bindCommands(contributed, false);
@@ -177,10 +191,49 @@ export function createEditor(options: CreateEditorOptions): Editor {
     }
 
     destroyed = true;
-    view?.destroy();
-    view = undefined;
+    destroyView();
     emitter.emit("destroy", undefined);
     emitter.clear();
+  }
+
+  function createView(element: HTMLElement): EditorView {
+    if (destroyed) {
+      throw new Error("Cannot create a view for a destroyed editor.");
+    }
+
+    view?.destroy();
+    view = new EditorView(element, {
+      state: currentState(),
+      dispatchTransaction: (transaction) => applyTransaction(transaction),
+      nodeViews: manager.nodeViews,
+    });
+
+    return view;
+  }
+
+  function destroyView(): void {
+    view?.destroy();
+    view = undefined;
+  }
+
+  function setContent(next: EditorContent, nextType?: EditorContentType): void {
+    if (destroyed) {
+      return;
+    }
+
+    const nextDoc = resolveContent(next, nextType, manager.schema, codec);
+
+    if (nextDoc.eq(currentState().doc)) {
+      return;
+    }
+
+    const transaction = currentState().tr.replaceWith(
+      0,
+      currentState().doc.content.size,
+      nextDoc.content,
+    );
+    transaction.setMeta(CONTROLLED_UPDATE_META, true);
+    applyTransaction(transaction);
   }
 
   function getMarkdown(): string {
@@ -203,9 +256,12 @@ export function createEditor(options: CreateEditorOptions): Editor {
     schema: manager.schema,
     commands,
     can,
+    createView,
     destroy,
+    destroyView,
     dispatch: applyTransaction,
     getMarkdown,
+    setContent,
     on: emitter.on,
   };
 }

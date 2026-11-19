@@ -12,6 +12,15 @@ export default defineConfig({
             "src/markdown/**/*.test.ts",
             "src/extensions/**/*.test.ts",
           ],
+          typecheck: {
+            enabled: true,
+            include: [
+              "src/core/**/*.test-d.ts",
+              "src/markdown/**/*.test-d.ts",
+              "src/extensions/**/*.test-d.ts",
+            ],
+            tsconfig: "./tsconfig.json",
+          },
         },
       },
       {

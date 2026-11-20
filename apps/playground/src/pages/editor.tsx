@@ -2,7 +2,6 @@ import { createMarkdownCodec, type Editor } from "@rk/editor";
 import { starterKit } from "@rk/editor/extensions";
 import { EditorContent, EditorProvider, useEditor, useEditorState } from "@rk/editor/react";
 import { setBlockType } from "prosemirror-commands";
-import type { EditorState } from "prosemirror-state";
 import { useMemo } from "react";
 
 const extensions = starterKit();
@@ -15,34 +14,15 @@ A small **bold** and *italic* playground.
 Select text and use the toolbar, or type Markdown shortcuts like \`**bold**\`, \`*italic*\` or \`# heading\`.
 `;
 
-const styles = {
-  page: {
-    fontFamily: "system-ui, sans-serif",
-    margin: "0 auto",
-    maxWidth: "48rem",
-    padding: "3rem 1.5rem",
-  },
-  editor: {
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    padding: "1rem",
-    minHeight: "10rem",
-  },
-  button: {
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    padding: "0.4rem 0.75rem",
-    background: "#fff",
-    cursor: "pointer",
-  },
-  buttonActive: {
-    background: "#111",
-    color: "#fff",
-    borderColor: "#111",
-  },
-};
+const buttonClass =
+  "border-border hover:bg-accent focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
 
-export function App() {
+const selectClass =
+  "border-border bg-background focus-visible:outline-ring rounded-md border px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+
+type EditorState = Editor["state"];
+
+export function EditorPage() {
   return (
     <EditorProvider
       extensions={extensions}
@@ -50,15 +30,28 @@ export function App() {
       content={initialContent}
       contentType="markdown"
     >
-      <main style={styles.page}>
-        <h1 style={{ marginTop: 0 }}>@rk/editor</h1>
-        <Toolbar />
-        <div style={styles.editor}>
-          <EditorContent />
-        </div>
-        <MarkdownPanel />
-      </main>
+      <EditorDemo />
     </EditorProvider>
+  );
+}
+
+function EditorDemo() {
+  return (
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight">@rk/editor</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Extensible ProseMirror editor with markdown as the interchange format.
+        </p>
+      </header>
+      <div className="flex flex-wrap items-center gap-2">
+        <Toolbar />
+      </div>
+      <div className="border-border bg-card text-card-foreground min-h-40 rounded-lg border p-4">
+        <EditorContent />
+      </div>
+      <MarkdownPanel />
+    </div>
   );
 }
 
@@ -85,11 +78,11 @@ function Toolbar() {
   };
 
   return (
-    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+    <>
       <button
         type="button"
         aria-pressed={bold}
-        style={bold ? { ...styles.button, ...styles.buttonActive } : styles.button}
+        className={buttonClass}
         onClick={() => editor.commands.toggleBold()}
       >
         Bold
@@ -97,7 +90,7 @@ function Toolbar() {
       <button
         type="button"
         aria-pressed={italic}
-        style={italic ? { ...styles.button, ...styles.buttonActive } : styles.button}
+        className={buttonClass}
         onClick={() => editor.commands.toggleItalic()}
       >
         Italic
@@ -105,8 +98,8 @@ function Toolbar() {
       <select
         aria-label="Block type"
         value={heading}
+        className={selectClass}
         onChange={(event) => setHeading(Number(event.target.value))}
-        style={{ ...styles.button, cursor: "pointer" }}
       >
         <option value={0}>Paragraph</option>
         {[1, 2, 3, 4, 5, 6].map((level) => (
@@ -115,7 +108,7 @@ function Toolbar() {
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 }
 
@@ -125,17 +118,9 @@ function MarkdownPanel() {
   const output = useMemo(() => editor.getMarkdown(), [editor, doc]);
 
   return (
-    <section style={{ marginTop: "2rem" }}>
-      <h2 style={{ fontSize: "1rem" }}>Markdown</h2>
-      <pre
-        style={{
-          background: "#f6f6f6",
-          borderRadius: "8px",
-          padding: "1rem",
-          overflow: "auto",
-          whiteSpace: "pre-wrap",
-        }}
-      >
+    <section className="flex flex-col gap-2">
+      <h2 className="text-sm font-semibold">Markdown</h2>
+      <pre className="bg-muted text-muted-foreground overflow-auto rounded-lg p-4 text-sm whitespace-pre-wrap">
         {output}
       </pre>
     </section>

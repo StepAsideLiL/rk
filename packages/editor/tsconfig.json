@@ -14,13 +14,6 @@
       "@rk/editor/testing": ["./src/testing/index.ts"]
     }
   },
-  "include": [
-    "src",
-    "playground",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "oxlint.config.ts",
-    "oxfmt.config.ts"
-  ],
+  "include": ["src", "vite.config.ts", "vitest.config.ts", "oxlint.config.ts", "oxfmt.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

@@ -9,9 +9,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@rk/editor": "workspace:*",
     "@rk/ui": "workspace:*",
+    "prosemirror-commands": "1.7.2",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",

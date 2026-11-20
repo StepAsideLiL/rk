@@ -29,7 +29,6 @@
     "bench": "vitest bench",
     "build": "vite build",
     "coverage": "vitest run --coverage",
-    "dev": "vite --config playground/vite.config.ts",
     "smoke": "node scripts/smoke-dist.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

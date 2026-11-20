@@ -85,3 +85,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Content rendered by the @rk/editor playground page. */
+.ProseMirror {
+  @apply min-h-32 outline-none;
+}
+
+.ProseMirror > :first-child {
+  @apply mt-0;
+}
+
+.ProseMirror > :last-child {
+  @apply mb-0;
+}
+
+.ProseMirror p {
+  @apply my-2;
+}
+
+.ProseMirror h1 {
+  @apply mt-6 mb-3 text-3xl font-bold tracking-tight;
+}
+
+.ProseMirror h2 {
+  @apply mt-5 mb-2 text-2xl font-bold tracking-tight;
+}
+
+.ProseMirror h3 {
+  @apply mt-4 mb-2 text-xl font-semibold;
+}
+
+.ProseMirror h4 {
+  @apply mt-4 mb-1 text-lg font-semibold;
+}
+
+.ProseMirror h5 {
+  @apply mt-3 mb-1 text-base font-semibold;
+}
+
+.ProseMirror h6 {
+  @apply mt-3 mb-1 text-sm font-semibold;
+}

@@ -1,8 +1,8 @@
 # Write your first extension
 
 This walkthrough builds a `Highlight` mark end to end: schema, commands, key
-binding, input rule, markdown parsing and serialization, tests, and playground
-wiring.
+binding, input rule, markdown parsing and serialization, tests, and toolbar
+wiring in the playground app.
 
 The finished extension lives in `src/extensions/highlight/highlight.ts` in a
 consumer package. Import the public entry points:

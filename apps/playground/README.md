@@ -8,6 +8,11 @@ Playground app for testing, experimenting, and viewing UI in the rk monorepo. Re
 pnpm --filter @rk/playground dev
 ```
 
+## Pages
+
+- `/` — lists the pages available in the playground.
+- `/editor` — interactive demo for `@rk/editor`.
+
 ## Theme
 
 - Default theme follows the system (`prefers-color-scheme`).

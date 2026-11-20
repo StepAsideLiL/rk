@@ -9,8 +9,10 @@ declarative extensions; markdown conversion is registry based.
 - Source-only workspace patterns do not apply: this package builds to `dist/`.
 - Run everything from the repo root with the package filter, for example
   `pnpm turbo run test typecheck lint build --filter=@rk/editor`.
-- Local scripts: `build`, `dev` (playground on port 5174), `test`,
-  `test:watch`, `typecheck`, `lint`, `coverage`, `bench`, `smoke`.
+- Local scripts: `build`, `test`, `test:watch`, `typecheck`, `lint`,
+  `coverage`, `bench`, `smoke`.
+- The interactive editor demo lives in the workspace playground app at
+  `/editor` (`apps/playground`).
 
 ## Layout
 
@@ -23,7 +25,6 @@ declarative extensions; markdown conversion is registry based.
 - `src/react` — provider, hooks, `EditorContent`, `createReactNodeView`.
 - `src/testing` — `createTestEditor`, `roundTrip`, `docOf`, `textOf`, `press`,
   `typeText`.
-- `playground/` — local Vite app, not published.
 - `docs/` — extension guide, contract reference, cookbook, testing guide.
 
 ## Rules
@@ -58,7 +59,7 @@ declarative extensions; markdown conversion is registry based.
 
 Add the <NAME> extension under src/extensions/<name> following the same contract and conventions as existing extensions.
 
-Include: schema, remark plugin(s) if needed (remark-gfm for tables/tasks, remark-directive for callouts), fromMdast/toMdast, commands with typed Commands augmentation, keymap, input rules, NodeView/plugin view if needed (destroy cleanup), state in a PluginKey, playground toolbar entry, and export from src/extensions/index.ts.
+Include: schema, remark plugin(s) if needed (remark-gfm for tables/tasks, remark-directive for callouts), fromMdast/toMdast, commands with typed Commands augmentation, keymap, input rules, NodeView/plugin view if needed (destroy cleanup), state in a PluginKey, a toolbar entry on the `apps/playground` editor page, and export from src/extensions/index.ts.
 
 Write the failing tests FIRST (round trips incl. nesting, empty, unicode, and the exact edge cases for this feature), confirm they fail, then implement.
 

@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "playground": "pnpm --filter @rk/playground dev",
     "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "playground": "pnpm --filter @rk/playground dev"
   },
   "devDependencies": {
     "oxfmt": "catalog:",

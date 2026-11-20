@@ -12,5 +12,6 @@ rk is a TypeScript monorepo managed with pnpm and Turborepo. Packages live in `a
 | `pnpm test`       | Run the test suites of all packages (via Turborepo)                            |
 | `pnpm typecheck`  | Typecheck all packages with tsc (via Turborepo)                                |
 | `pnpm playground` | Run the playground app (Vite dev server)                                       |
+| `pnpm check`      | Run lint typecheck test build (via Turborepo)                                  |
 
 Run a single command in one package with `pnpm exec turbo run <task> --filter=<package>`.

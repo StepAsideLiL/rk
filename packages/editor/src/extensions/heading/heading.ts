@@ -48,6 +48,9 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
         toDOM: (node) => [`h${node.attrs.level}`, 0] as const,
       },
     },
+    html: {
+      sanitize: { tagNames: levels.map((level) => `h${level}`) },
+    },
     commands(context) {
       const heading = getNodeType(context.schema, NODE_NAMES.heading);
       const paragraph = getNodeType(context.schema, NODE_NAMES.paragraph);

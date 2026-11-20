@@ -11,7 +11,8 @@
       "@rk/editor": ["./src/index.ts"],
       "@rk/editor/react": ["./src/react/index.ts"],
       "@rk/editor/extensions": ["./src/extensions/index.ts"],
-      "@rk/editor/testing": ["./src/testing/index.ts"]
+      "@rk/editor/testing": ["./src/testing/index.ts"],
+      "@rk/editor/html": ["./src/html/index.ts"]
     }
   },
   "include": ["src", "vite.config.ts", "vitest.config.ts", "oxlint.config.ts", "oxfmt.config.ts"],

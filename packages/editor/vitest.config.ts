@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      include: ["src/core/**/*.ts", "src/markdown/**/*.ts"],
+      include: ["src/core/**/*.ts", "src/markdown/**/*.ts", "src/html/**/*.ts"],
       exclude: ["**/*.test.*", "**/*.test-d.ts", "**/*.test-utils.*", "**/*.bench.ts"],
       reporter: ["text", "json-summary", "html"],
       reportsDirectory: "coverage",
@@ -19,6 +19,7 @@ export default defineConfig({
             "src/core/**/*.test.ts",
             "src/markdown/**/*.test.ts",
             "src/extensions/**/*.test.ts",
+            "src/html/**/*.test.ts",
           ],
           typecheck: {
             enabled: true,
@@ -26,6 +27,7 @@ export default defineConfig({
               "src/core/**/*.test-d.ts",
               "src/markdown/**/*.test-d.ts",
               "src/extensions/**/*.test-d.ts",
+              "src/html/**/*.test-d.ts",
             ],
             tsconfig: "./tsconfig.json",
           },

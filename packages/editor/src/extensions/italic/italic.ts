@@ -23,6 +23,9 @@ export const Italic = defineExtension(() => ({
       toDOM: () => ["em", 0],
     },
   },
+  html: {
+    sanitize: { tagNames: ["em", "i"] },
+  },
   commands(context) {
     const emphasis = getMarkType(context.schema, MARK_NAMES.italic);
 

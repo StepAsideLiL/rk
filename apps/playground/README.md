@@ -11,7 +11,7 @@ pnpm --filter @rk/playground dev
 ## Pages
 
 - `/` — lists the pages available in the playground.
-- `/editor` — interactive demo for `@rk/editor`.
+- `/editor` — interactive demo for `@rk/editor` with Markdown/HTML input and output panels.
 
 ## Theme
 

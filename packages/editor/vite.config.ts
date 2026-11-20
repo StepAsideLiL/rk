@@ -35,6 +35,7 @@ export default defineConfig({
         "react/index": "src/react/index.ts",
         "extensions/index": "src/extensions/index.ts",
         "testing/index": "src/testing/index.ts",
+        "html/index": "src/html/index.ts",
       },
     },
     rollupOptions: {

@@ -6,4 +6,6 @@
   markdown handler and boundary rule.
 - [Cookbook](./cookbook.md) — NodeViews, plugin state, decorations and
   transaction-meta messaging.
+- [HTML codec](./html.md) — sanitized HTML parsing, serialization, allowlists and
+  the markdown-lossy vs HTML-lossless boundary.
 - [Testing guide](./testing.md) — headless helpers, DOM tests, property tests.

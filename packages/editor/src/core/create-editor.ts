@@ -9,6 +9,8 @@ import type {
   Command,
   CommandRegistry,
   Commands,
+  ContentCodec,
+  ContentType,
   Extension,
   ExtensionContext,
   MarkdownCodec,
@@ -18,7 +20,17 @@ import type {
 export type EditorContent = PmNode | string | { readonly [key: string]: unknown };
 
 /** How string content should be interpreted. */
-export type EditorContentType = "json" | "markdown";
+export type EditorContentType = ContentType;
+
+/** JSON codec used when no custom one is injected. */
+export const jsonCodec: ContentCodec = {
+  parse(content, schema) {
+    return schema.nodeFromJSON(JSON.parse(content));
+  },
+  serialize(doc) {
+    return JSON.stringify(doc.toJSON());
+  },
+};
 
 /** Options accepted by {@link createEditor}. */
 export interface CreateEditorOptions {
@@ -35,8 +47,17 @@ export interface CreateEditorOptions {
   readonly element?: HTMLElement;
 
   /**
+   * Codecs keyed by content type. Core never imports a codec implementation.
+   *
+   * JSON always has a built-in codec; markdown and HTML must be injected.
+   */
+  readonly codecs?: Partial<Record<ContentType, ContentCodec>>;
+
+  /**
    * Markdown codec from the markdown module. Required for markdown content and
    * for {@link Editor.getMarkdown}; core never imports that module directly.
+   *
+   * Kept for backward compatibility; `codecs.markdown` takes precedence.
    */
   readonly markdown?: MarkdownCodec;
 }
@@ -97,6 +118,12 @@ export interface Editor {
   /** Serialize the current document to markdown using the injected codec. */
   getMarkdown(): string;
 
+  /** Serialize the current document to HTML using the injected codec. */
+  getHTML(): string;
+
+  /** Serialize the current document to JSON. */
+  getJSON(): string;
+
   /**
    * Replace the document from outside the editor.
    *
@@ -123,7 +150,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
   const manager = createExtensionManager(options.extensions);
   const emitter = createEmitter();
   const registry = createCommandRegistry();
-  const codec = options.markdown;
+  const codecs = resolveCodecs(options);
 
   let state: EditorState | undefined;
   let view: EditorView | undefined;
@@ -148,7 +175,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
   registry.register(contributed);
 
   const plugins = manager.createPlugins(context);
-  const doc = resolveContent(options.content, options.contentType, manager.schema, codec);
+  const doc = resolveContent(options.content, options.contentType, manager.schema, codecs);
   state = EditorState.create({ schema: manager.schema, doc, plugins });
 
   if (options.element) {
@@ -221,7 +248,7 @@ export function createEditor(options: CreateEditorOptions): Editor {
       return;
     }
 
-    const nextDoc = resolveContent(next, nextType, manager.schema, codec);
+    const nextDoc = resolveContent(next, nextType, manager.schema, codecs);
 
     if (nextDoc.eq(currentState().doc)) {
       return;
@@ -237,13 +264,15 @@ export function createEditor(options: CreateEditorOptions): Editor {
   }
 
   function getMarkdown(): string {
-    if (!codec) {
-      throw new Error(
-        "No markdown codec was provided to createEditor. Pass the codec from createMarkdownCodec().",
-      );
-    }
+    return codecFor(codecs, "markdown").serialize(currentState().doc);
+  }
 
-    return codec.serialize(currentState().doc);
+  function getHTML(): string {
+    return codecFor(codecs, "html").serialize(currentState().doc);
+  }
+
+  function getJSON(): string {
+    return codecFor(codecs, "json").serialize(currentState().doc);
   }
 
   return {
@@ -261,9 +290,34 @@ export function createEditor(options: CreateEditorOptions): Editor {
     destroyView,
     dispatch: applyTransaction,
     getMarkdown,
+    getHTML,
+    getJSON,
     setContent,
     on: emitter.on,
   };
+}
+
+/** Resolve the codecs, honoring the legacy `markdown` option. */
+function resolveCodecs(options: CreateEditorOptions): Partial<Record<ContentType, ContentCodec>> {
+  return {
+    json: options.codecs?.json ?? jsonCodec,
+    markdown: options.codecs?.markdown ?? options.markdown,
+    html: options.codecs?.html,
+  };
+}
+
+/** Return the codec for a format or throw a clear error. */
+function codecFor(
+  codecs: Partial<Record<ContentType, ContentCodec>>,
+  type: ContentType,
+): ContentCodec {
+  const codec = codecs[type];
+
+  if (!codec) {
+    throw new Error(`No ${type} codec was provided to createEditor. Pass it in options.codecs.`);
+  }
+
+  return codec;
 }
 
 /** Resolve the initial document from the options. */
@@ -271,7 +325,7 @@ function resolveContent(
   content: EditorContent | undefined,
   contentType: EditorContentType | undefined,
   schema: Schema,
-  codec: MarkdownCodec | undefined,
+  codecs: Partial<Record<ContentType, ContentCodec>>,
 ): PmNode {
   if (content === undefined) {
     const doc = schema.topNodeType.createAndFill();
@@ -287,21 +341,23 @@ function resolveContent(
     return content;
   }
 
-  if ((contentType ?? "json") === "markdown") {
-    if (!codec) {
-      throw new Error(
-        'contentType "markdown" requires a markdown codec from createMarkdownCodec().',
-      );
-    }
+  const type = contentType ?? "json";
 
-    if (typeof content !== "string") {
-      throw new Error('contentType "markdown" requires string content.');
-    }
-
-    return codec.parse(content, schema);
+  if (type === "json" && typeof content !== "string") {
+    return schema.nodeFromJSON(content);
   }
 
-  return schema.nodeFromJSON(typeof content === "string" ? JSON.parse(content) : content);
+  const codec = codecs[type];
+
+  if (!codec) {
+    throw new Error(`contentType "${type}" requires a ${type} codec.`);
+  }
+
+  if (typeof content !== "string") {
+    throw new Error(`contentType "${type}" requires string content.`);
+  }
+
+  return codec.parse(content, schema);
 }
 
 /** Minimal typed emitter for editor events. */

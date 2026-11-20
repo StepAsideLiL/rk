@@ -1,10 +1,12 @@
 import { createMarkdownCodec } from "@rk/editor";
 import { starterKit } from "@rk/editor/extensions";
+import { createHtmlCodec } from "@rk/editor/html";
 import { EditorProvider } from "@rk/editor/react";
 import { createTestEditor } from "@rk/editor/testing";
 
 const extensions = starterKit();
 const codec = createMarkdownCodec({ extensions });
+const htmlCodec = createHtmlCodec({ extensions });
 const editor = createTestEditor(extensions, "**built** package");
 
 editor.state.doc.check();
@@ -19,6 +21,10 @@ if (typeof EditorProvider !== "function") {
 
 if (typeof codec.parse !== "function" || typeof codec.serialize !== "function") {
   throw new Error("Main entry did not export a markdown codec.");
+}
+
+if (typeof htmlCodec.parse !== "function" || typeof htmlCodec.serialize !== "function") {
+  throw new Error("HTML entry did not export an HTML codec.");
 }
 
 editor.destroy();

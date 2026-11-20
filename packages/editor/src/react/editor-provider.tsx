@@ -4,12 +4,15 @@ import { createContext, useEffect, useRef, useState, type ReactNode } from "reac
 
 import {
   CONTROLLED_UPDATE_META,
-  createEditor,
   type Editor,
   type EditorContent as EditorContentValue,
   type EditorContentType,
 } from "../core/create-editor";
-import type { Extension, MarkdownCodec } from "../core/types";
+import type { ContentCodec, ContentType, Extension, MarkdownCodec } from "../core/types";
+import { createEditor } from "../editor";
+
+/** Serialized format passed to `onChange` when `outputFormat` is set. */
+export type EditorOutputFormat = ContentType;
 
 /** Props for {@link EditorProvider}. */
 export interface EditorProviderProps {
@@ -22,11 +25,25 @@ export interface EditorProviderProps {
   /** Interpretation of string content. Defaults to `"json"`. */
   readonly contentType?: EditorContentType;
 
-  /** Markdown codec from `createMarkdownCodec`, required for markdown. */
+  /** Markdown codec from `createMarkdownCodec`, kept for compatibility. */
   readonly markdown?: MarkdownCodec;
 
-  /** Called once per document-changing transaction from the editor itself. */
-  readonly onChange?: (editor: Editor) => void;
+  /** Optional codec overrides keyed by content type. */
+  readonly codecs?: Partial<Record<ContentType, ContentCodec>>;
+
+  /**
+   * Serialized format passed as the second `onChange` argument.
+   *
+   * When omitted, `onChange` keeps its original `(editor) => void` behavior.
+   */
+  readonly outputFormat?: EditorOutputFormat;
+
+  /**
+   * Called once per document-changing transaction from the editor itself.
+   *
+   * The second argument is set only when `outputFormat` is provided.
+   */
+  readonly onChange?: (editor: Editor, output?: string) => void;
 
   readonly children?: ReactNode;
 }
@@ -46,10 +63,12 @@ export function EditorProvider({
   content,
   contentType,
   markdown,
+  codecs,
+  outputFormat,
   onChange,
   children,
 }: EditorProviderProps) {
-  const initial = useRef({ extensions, content, contentType, markdown });
+  const initial = useRef({ extensions, content, contentType, markdown, codecs });
   const [editor, setEditor] = useState<Editor | null>(null);
 
   useEffect(() => {
@@ -85,9 +104,25 @@ export function EditorProvider({
         return;
       }
 
-      onChange(editor);
+      if (outputFormat) {
+        onChange(editor, serialize(editor, outputFormat));
+      } else {
+        onChange(editor);
+      }
     });
-  }, [editor, onChange]);
+  }, [editor, onChange, outputFormat]);
 
   return <EditorContext.Provider value={editor}>{editor ? children : null}</EditorContext.Provider>;
+}
+
+/** Serialize the editor in the requested output format. */
+function serialize(editor: Editor, format: EditorOutputFormat): string {
+  switch (format) {
+    case "html":
+      return editor.getHTML();
+    case "json":
+      return editor.getJSON();
+    case "markdown":
+      return editor.getMarkdown();
+  }
 }

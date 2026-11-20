@@ -23,6 +23,9 @@ export const Bold = defineExtension(() => ({
       toDOM: () => ["strong", 0],
     },
   },
+  html: {
+    sanitize: { tagNames: ["strong", "b"] },
+  },
   commands(context) {
     const strong = getMarkType(context.schema, MARK_NAMES.bold);
 

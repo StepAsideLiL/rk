@@ -9,6 +9,7 @@ declarative extensions over ProseMirror.
 | ----------------- | ------------------------------------------------------ |
 | `src/core/`       | Types, extension manager and editor factory. DOM-free. |
 | `src/markdown/`   | unified pipeline and mdast <-> ProseMirror handlers.   |
+| `src/html/`       | Sanitized rehype pipeline and HTML codec.              |
 | `src/extensions/` | One folder per feature.                                |
 | `src/react/`      | React provider, hooks and NodeView helper.             |
 | `src/testing/`    | Test helpers, exported as `@rk/editor/testing`.        |
@@ -22,6 +23,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-Consumers use `@rk/editor`, `@rk/editor/react`, `@rk/editor/extensions` and
-`@rk/editor/testing`. The interactive demo runs in the workspace playground at
-`/editor` (`pnpm playground` from the repo root).
+Consumers use `@rk/editor`, `@rk/editor/react`, `@rk/editor/extensions`,
+`@rk/editor/html` and `@rk/editor/testing`. `createEditor` wires the markdown,
+HTML and JSON codecs by default. The interactive demo runs in the workspace
+playground at `/editor` (`pnpm playground` from the repo root).

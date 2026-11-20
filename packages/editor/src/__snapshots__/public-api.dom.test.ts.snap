@@ -34,6 +34,13 @@ exports[`public API > snapshots the ./extensions entry 1`] = `
 ]
 `;
 
+exports[`public API > snapshots the ./html entry 1`] = `
+[
+  "buildSanitizeSchema",
+  "createHtmlCodec",
+]
+`;
+
 exports[`public API > snapshots the ./react entry 1`] = `
 [
   "EditorContent",

@@ -1,18 +1,23 @@
-import { createMarkdownCodec, type Editor } from "@rk/editor";
+import { type Editor } from "@rk/editor";
 import { starterKit } from "@rk/editor/extensions";
 import { EditorContent, EditorProvider, useEditor, useEditorState } from "@rk/editor/react";
 import { setBlockType } from "prosemirror-commands";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const extensions = starterKit();
-const markdown = createMarkdownCodec({ extensions });
 
-const initialContent = `# rk editor
+const markdownContent = `# rk editor
 
 A small **bold** and *italic* playground.
 
 Select text and use the toolbar, or type Markdown shortcuts like \`**bold**\`, \`*italic*\` or \`# heading\`.
 `;
+
+const htmlContent = `<h1>rk editor</h1>
+<p>A small <strong>bold</strong> and <em>italic</em> playground.</p>
+<p>Select text and use the toolbar, or switch the input format back to Markdown.</p>`;
+
+type InputFormat = "markdown" | "html";
 
 const buttonClass =
   "border-border hover:bg-accent focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
@@ -23,35 +28,57 @@ const selectClass =
 type EditorState = Editor["state"];
 
 export function EditorPage() {
+  const [inputFormat, setInputFormat] = useState<InputFormat>("markdown");
+  const content = inputFormat === "markdown" ? markdownContent : htmlContent;
+
   return (
-    <EditorProvider
-      extensions={extensions}
-      markdown={markdown}
-      content={initialContent}
-      contentType="markdown"
-    >
-      <EditorDemo />
-    </EditorProvider>
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">@rk/editor</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Extensible ProseMirror editor with markdown and HTML as interchange formats.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          Input
+          <select
+            aria-label="Input format"
+            value={inputFormat}
+            className={selectClass}
+            onChange={(event) => setInputFormat(event.target.value as InputFormat)}
+          >
+            <option value="markdown">Markdown</option>
+            <option value="html">HTML</option>
+          </select>
+        </label>
+      </header>
+      <EditorProvider
+        key={inputFormat}
+        extensions={extensions}
+        content={content}
+        contentType={inputFormat}
+      >
+        <EditorDemo />
+      </EditorProvider>
+    </div>
   );
 }
 
 function EditorDemo() {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">@rk/editor</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Extensible ProseMirror editor with markdown as the interchange format.
-        </p>
-      </header>
+    <>
       <div className="flex flex-wrap items-center gap-2">
         <Toolbar />
       </div>
       <div className="border-border bg-card text-card-foreground min-h-40 rounded-lg border p-4">
         <EditorContent />
       </div>
-      <MarkdownPanel />
-    </div>
+      <div className="grid gap-6">
+        <MarkdownPanel />
+        <HtmlPanel />
+      </div>
+    </>
   );
 }
 
@@ -117,9 +144,21 @@ function MarkdownPanel() {
   const doc = useEditorState((state) => state.doc);
   const output = useMemo(() => editor.getMarkdown(), [editor, doc]);
 
+  return <OutputPanel title="Markdown" output={output} />;
+}
+
+function HtmlPanel() {
+  const editor = useEditor();
+  const doc = useEditorState((state) => state.doc);
+  const output = useMemo(() => editor.getHTML(), [editor, doc]);
+
+  return <OutputPanel title="HTML" output={output} />;
+}
+
+function OutputPanel({ title, output }: { readonly title: string; readonly output: string }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-semibold">Markdown</h2>
+      <h2 className="text-sm font-semibold">{title}</h2>
       <pre className="bg-muted text-muted-foreground overflow-auto rounded-lg p-4 text-sm whitespace-pre-wrap">
         {output}
       </pre>

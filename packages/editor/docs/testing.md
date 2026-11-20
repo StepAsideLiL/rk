@@ -2,7 +2,8 @@
 
 Tests run in two Vitest projects:
 
-- **node** — core, markdown and extension tests (`environment: "node"`).
+- **node** — core, markdown, HTML and extension tests (`environment: "node"`).
+  HTML tests inject a `linkedom` document into the codec.
 - **dom** — React tests and files named `*.dom.test.ts(x)` (`environment: "jsdom"`).
 
 Use `@rk/editor/testing` for headless helpers.
@@ -166,9 +167,30 @@ fc.assert(
 
 See `src/extensions/markdown-property.test.ts` for a complete generator.
 
+## HTML tests
+
+The HTML codec needs a DOM only when parsing or serializing. Inject a
+`linkedom` document in the node project:
+
+```ts
+import { parseHTML } from "linkedom";
+import { createHtmlCodec } from "@rk/editor/html";
+import { starterKit } from "@rk/editor/extensions";
+
+const { document } = parseHTML("<!doctype html><html><body></body></html>");
+const codec = createHtmlCodec({ extensions: starterKit(), document });
+```
+
+HTML suites cover round trips, XSS, messy pasted markup, cross-format
+conversion and a consistency guard that serializes every schema node and mark
+through `toDOM`, then asserts the sanitizer leaves it unchanged. The guard fails
+when an extension forgets `html.sanitize`.
+
 ## Test layout
 
 - Unit tests live next to the extension: `heading/heading.test.ts`.
+- HTML codec tests live in `src/html/*.test.ts` and use `linkedom`.
 - DOM tests live next to the code: `heading/heading.dom.test.ts`.
 - Benchmarks use `*.bench.ts` and run with `pnpm bench`.
-- Coverage runs with `pnpm coverage`; it covers `src/core` and `src/markdown`.
+- Coverage runs with `pnpm coverage`; it covers `src/core`, `src/markdown` and
+  `src/html`.

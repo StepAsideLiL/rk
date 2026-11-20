@@ -179,19 +179,51 @@ export interface MarkdownContributions {
   readonly markToMdast?: Readonly<Record<string, PmMarkHandler>>;
 }
 
-/**
- * Markdown conversion pipeline injected into the editor.
- *
- * Core owns no markdown dependency: the markdown module implements this
- * interface and `createEditor` uses it for `contentType: "markdown"` and
- * `editor.getMarkdown()`.
- */
-export interface MarkdownCodec {
-  /** Parse markdown into a ProseMirror document for the given schema. */
-  parse(markdown: string, schema: Schema): PmNode;
+/** Content formats the editor can parse and serialize. */
+export type ContentType = "markdown" | "html" | "json";
 
-  /** Serialize a ProseMirror document to markdown. */
+/**
+ * A parser/serializer pair for one content format.
+ *
+ * Core owns no conversion dependency: codecs are injected so the editor only
+ * depends on this small contract.
+ */
+export interface ContentCodec {
+  /** Parse content into a ProseMirror document for the given schema. */
+  parse(content: string, schema: Schema): PmNode;
+
+  /** Serialize a ProseMirror document to this content format. */
   serialize(doc: PmNode): string;
+}
+
+/** Markdown codec, kept as an alias for the shared codec contract. */
+export type MarkdownCodec = ContentCodec;
+
+/** Attribute allowlist entry used by the HTML sanitizer. */
+export type HtmlAttributeDefinition = string | readonly [string, ...string[]];
+
+/** Sanitizer data contributed by an extension for the HTML codec. */
+export interface HtmlSanitizeContributions {
+  /** Elements this extension reads and writes. */
+  readonly tagNames?: readonly string[];
+
+  /** Attributes allowed on specific elements, keyed by tag name. */
+  readonly attributes?: Readonly<Record<string, readonly HtmlAttributeDefinition[]>>;
+
+  /** URL protocols allowed for specific attributes, keyed by attribute name. */
+  readonly protocols?: Readonly<Record<string, readonly string[]>>;
+}
+
+/**
+ * HTML contributions attached to an extension.
+ *
+ * Extensions never implement per-node HTML handlers: the HTML codec is driven
+ * by the same `parseDOM`/`toDOM` specs as ProseMirror and only needs allowlist
+ * data here.
+ */
+export interface HtmlContributions {
+  /** Sanitizer allowlist data for elements this extension renders. */
+  readonly sanitize?: HtmlSanitizeContributions;
 }
 
 /**
@@ -200,7 +232,7 @@ export interface MarkdownCodec {
  * Extensions are plain objects. Every part is optional except the `name`, which
  * identifies the extension for ordering and {@link Extension.requires}.
  * Contributions are merged by the manager into a schema, a plugin list, a
- * keymap, a command registry and a markdown handler registry.
+ * keymap, a command registry and markdown/HTML registries.
  */
 export interface Extension<Options = void> {
   /** Unique extension name, used by {@link Extension.requires}. */
@@ -242,6 +274,9 @@ export interface Extension<Options = void> {
 
   /** Markdown parsing and serialization contributions. */
   readonly markdown?: MarkdownContributions;
+
+  /** HTML sanitizer allowlist contributions. */
+  readonly html?: HtmlContributions;
 
   /**
    * Type-level marker that ties the extension to the options its factory

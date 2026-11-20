@@ -3,7 +3,7 @@ import { Plugin, PluginKey } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
 import { CONTROLLED_UPDATE_META, createEditor } from "./create-editor";
-import type { Command, Extension, MarkdownCodec } from "./types";
+import type { Command, ContentCodec, Extension, MarkdownCodec } from "./types";
 
 declare module "./types" {
   interface Commands {
@@ -224,6 +224,46 @@ describe("createEditor", () => {
         markdown: codec,
       }),
     ).toThrow(/string content/);
+  });
+
+  it("uses an injected HTML codec for content and getHTML", () => {
+    const html: ContentCodec = {
+      parse(content, schema) {
+        return schema.node("doc", null, [schema.node("paragraph", null, [schema.text(content)])]);
+      },
+      serialize(doc) {
+        return `<p>${doc.textContent}</p>`;
+      },
+    };
+    const editor = createEditor({
+      extensions: withCommand(() => true),
+      content: "html",
+      contentType: "html",
+      codecs: { html },
+    });
+
+    expect(editor.getHTML()).toBe("<p>html</p>");
+    editor.setContent("next", "html");
+    expect(editor.getHTML()).toBe("<p>next</p>");
+  });
+
+  it("requires a codec for HTML content and getHTML", () => {
+    expect(() =>
+      createEditor({
+        extensions: withCommand(() => true),
+        content: "<p>x</p>",
+        contentType: "html",
+      }),
+    ).toThrow(/html codec/);
+
+    const editor = createEditor({ extensions: withCommand(() => true) });
+    expect(() => editor.getHTML()).toThrow(/html codec/);
+  });
+
+  it("serializes the document to JSON", () => {
+    const editor = createEditor({ extensions: withCommand(() => true) });
+
+    expect(editor.getJSON()).toBe(JSON.stringify(editor.state.doc.toJSON()));
   });
 
   it("accepts a ProseMirror node as content", () => {

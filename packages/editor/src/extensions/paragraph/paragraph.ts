@@ -16,6 +16,9 @@ export const Paragraph = defineExtension(() => ({
       toDOM: () => ["p", 0],
     },
   },
+  html: {
+    sanitize: { tagNames: ["p"] },
+  },
   markdown: {
     fromMdast: {
       paragraph(node, state) {

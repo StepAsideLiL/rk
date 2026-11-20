@@ -23,6 +23,10 @@
     "./testing": {
       "types": "./dist/testing/index.d.ts",
       "import": "./dist/testing/index.js"
+    },
+    "./html": {
+      "types": "./dist/html/index.d.ts",
+      "import": "./dist/html/index.js"
     }
   },
   "scripts": {
@@ -37,6 +41,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/hast": "3.0.5",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
     "prosemirror-commands": "1.7.2",
@@ -48,6 +53,9 @@
     "prosemirror-state": "1.4.4",
     "prosemirror-transform": "1.12.6",
     "prosemirror-view": "1.42.9",
+    "rehype-parse": "9.0.1",
+    "rehype-sanitize": "6.0.0",
+    "rehype-stringify": "10.0.1",
     "remark-parse": "11.0.0",
     "remark-stringify": "11.0.0",
     "unified": "11.0.5"
@@ -63,6 +71,7 @@
     "@vitest/coverage-v8": "5.1.1",
     "fast-check": "4.10.3",
     "jsdom": "31.0.1",
+    "linkedom": "0.18.15",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "react": "catalog:",

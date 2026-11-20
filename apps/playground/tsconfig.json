@@ -10,6 +10,7 @@
       "@rk/editor": ["../../packages/editor/src/index.ts"],
       "@rk/editor/react": ["../../packages/editor/src/react/index.ts"],
       "@rk/editor/extensions": ["../../packages/editor/src/extensions/index.ts"],
+      "@rk/editor/html": ["../../packages/editor/src/html/index.ts"],
       "@rk/editor/testing": ["../../packages/editor/src/testing/index.ts"]
     }
   },

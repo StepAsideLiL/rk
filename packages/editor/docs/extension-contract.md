@@ -52,6 +52,7 @@ option-less factories as `Bold()`; call configured ones as
 | `nodeViews`  | `Record<string, NodeViewConstructor>`  | Must clean up in `destroy()`.                                                        |
 | `inputRules` | `(context) => readonly InputRule[]`    | Typed markdown-style shortcuts.                                                      |
 | `markdown`   | `MarkdownContributions`                | Parsing and serialization.                                                           |
+| `html`       | `HtmlContributions`                    | HTML sanitizer allowlists.                                                           |
 | `options`    | `Options`                              | Type-level marker only; never set at runtime.                                        |
 
 ### Priority
@@ -166,6 +167,24 @@ Built-in marks (`strong`, `emphasis`, `code`, `link`) do not need handlers.
 Custom marks do. The serializer nests built-ins as
 `link > strong > emphasis > code`, then custom marks in registration order.
 
+## HTML contributions
+
+The HTML codec does not use per-extension handlers. It reuses each node and
+mark's `parseDOM`/`toDOM` and only needs sanitizer allowlist data:
+
+```ts
+html: {
+  sanitize: {
+    tagNames: ["mark"],
+    attributes: { mark: ["className"] },
+    protocols: {},
+  },
+},
+```
+
+See [the HTML codec guide](./html.md) for the default-deny schema, protocol
+rules and the consistency test that catches missing allowlists.
+
 ### Unknown-node strategy
 
 `createMarkdownCodec({ extensions, unknownNode })` supports `"throw"`,
@@ -191,28 +210,33 @@ codec and editor explicitly:
 
 ```ts
 const extensions = starterKit();
-const markdown = createMarkdownCodec({ extensions });
 const editor = createEditor({
   extensions,
-  markdown,
   content: "# Hi",
   contentType: "markdown",
 });
 
 editor.setContent("**updated**", "markdown");
 editor.getMarkdown();
+
+editor.setContent("<p><strong>updated</strong></p>", "html");
+editor.getHTML();
+editor.getJSON();
 ```
 
-React uses the same pieces through `<EditorProvider extensions markdown />`.
+The public `createEditor` wrapper assembles the markdown, HTML and JSON codecs.
+Pass `codecs` to override one, or the legacy `markdown` option to replace only
+markdown. React uses the same defaults through `<EditorProvider extensions />`.
 
 ## Package boundaries
 
-| Folder           | May import from                      |
-| ---------------- | ------------------------------------ |
-| `src/core`       | external packages only               |
-| `src/markdown`   | `src/core`                           |
-| `src/react`      | `src/core`                           |
-| `src/extensions` | `src/core`, shared extension helpers |
+| Folder           | May import from                       |
+| ---------------- | ------------------------------------- |
+| `src/core`       | external packages only                |
+| `src/markdown`   | `src/core`                            |
+| `src/html`       | `src/core`                            |
+| `src/react`      | `src/core`, the public editor wrapper |
+| `src/extensions` | `src/core`, shared extension helpers  |
 
 Tests may import their subject and testing helpers. oxlint enforces
 `no-restricted-imports`; violations fail `pnpm lint`.

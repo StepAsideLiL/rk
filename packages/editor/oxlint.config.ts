@@ -17,15 +17,18 @@ export default defineConfig({
                 group: [
                   "**/extensions",
                   "**/extensions/**",
+                  "**/html",
+                  "**/html/**",
                   "**/markdown",
                   "**/markdown/**",
                   "**/react",
                   "**/react/**",
                   "@rk/editor/extensions",
+                  "@rk/editor/html",
                   "@rk/editor/markdown",
                   "@rk/editor/react",
                 ],
-                message: "core must not import from extensions, markdown or react.",
+                message: "core must not import from extensions, html, markdown or react.",
               },
             ],
           },
@@ -52,12 +55,15 @@ export default defineConfig({
                 group: [
                   "**/extensions",
                   "**/extensions/**",
+                  "**/html",
+                  "**/html/**",
                   "**/react",
                   "**/react/**",
                   "@rk/editor/extensions",
+                  "@rk/editor/html",
                   "@rk/editor/react",
                 ],
-                message: "markdown must not import from extensions or react.",
+                message: "markdown must not import from extensions, html or react.",
               },
             ],
           },
@@ -74,6 +80,32 @@ export default defineConfig({
       },
     },
     {
+      files: ["src/html/**"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            patterns: [
+              {
+                group: [
+                  "**/extensions",
+                  "**/extensions/**",
+                  "**/markdown",
+                  "**/markdown/**",
+                  "**/react",
+                  "**/react/**",
+                  "@rk/editor/extensions",
+                  "@rk/editor/markdown",
+                  "@rk/editor/react",
+                ],
+                message: "html must only import from core.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ["src/extensions/**"],
       rules: {
         "no-restricted-imports": [
@@ -81,8 +113,15 @@ export default defineConfig({
           {
             patterns: [
               {
-                group: ["**/react", "**/react/**", "@rk/editor/react"],
-                message: "extensions must not import from react.",
+                group: [
+                  "**/html",
+                  "**/html/**",
+                  "**/react",
+                  "**/react/**",
+                  "@rk/editor/html",
+                  "@rk/editor/react",
+                ],
+                message: "extensions must not import from html or react.",
               },
             ],
           },
@@ -100,12 +139,15 @@ export default defineConfig({
                 group: [
                   "**/extensions",
                   "**/extensions/**",
+                  "**/html",
+                  "**/html/**",
                   "**/markdown",
                   "**/markdown/**",
                   "@rk/editor/extensions",
+                  "@rk/editor/html",
                   "@rk/editor/markdown",
                 ],
-                message: "react must not import from extensions or markdown.",
+                message: "react must not import from extensions, html or markdown.",
               },
             ],
           },
@@ -117,9 +159,11 @@ export default defineConfig({
         "src/react/**/*.test.{ts,tsx}",
         "src/react/**/*.test-utils.{ts,tsx}",
         "src/react/**/*.test-d.ts",
+        "src/html/**/*.test.ts",
+        "src/html/**/*.test-utils.ts",
       ],
       rules: {
-        // React tests may use the extension set to exercise the bindings.
+        // Tests may assemble the public entry points to exercise integration.
         "no-restricted-imports": "off",
       },
     },

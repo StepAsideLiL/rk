@@ -2,7 +2,14 @@ import type { PhrasingContent } from "mdast";
 import { Schema } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { inlineFromMdast, inlineToMdast, markFromMdast, withMdastMarks } from "./marks";
+import {
+  inlineFromMdast,
+  inlineToMdast,
+  isMdastMark,
+  markFromMdast,
+  withMdastMarks,
+  type MdastMark,
+} from "./marks";
 
 const schema = new Schema({
   nodes: {
@@ -16,11 +23,28 @@ const schema = new Schema({
     emphasis: {},
     code: {},
     link: { attrs: { href: { default: "" }, title: { default: null } } },
+    highlight: {},
   },
 });
 
 const markNames = (node: { marks: readonly { type: { name: string } }[] }) =>
   node.marks.map((mark) => mark.type.name).sort();
+
+describe("isMdastMark", () => {
+  it.each<[string, PhrasingContent]>([
+    ["strong", { type: "strong", children: [] }],
+    ["emphasis", { type: "emphasis", children: [] }],
+    ["inlineCode", { type: "inlineCode", value: "x" }],
+    ["link", { type: "link", url: "https://example.com", title: null, children: [] }],
+  ])("recognizes %s", (_name, node) => {
+    expect(isMdastMark(node)).toBe(true);
+  });
+
+  it("rejects other phrasing nodes", () => {
+    expect(isMdastMark({ type: "text", value: "x" })).toBe(false);
+    expect(isMdastMark({ type: "break" })).toBe(false);
+  });
+});
 
 describe("markFromMdast", () => {
   it("maps mark wrappers to schema marks", () => {
@@ -33,7 +57,12 @@ describe("markFromMdast", () => {
     ).toEqual({ href: "https://example.com", title: null });
   });
 
-  it("returns null when the schema lacks the mark", () => {
+  it.each<[string, MdastMark]>([
+    ["strong", { type: "strong", children: [] }],
+    ["emphasis", { type: "emphasis", children: [] }],
+    ["inlineCode", { type: "inlineCode", value: "x" }],
+    ["link", { type: "link", url: "https://example.com", title: null, children: [] }],
+  ])("returns null when the schema lacks the %s mark", (_name, node) => {
     const bare = new Schema({
       nodes: {
         doc: { content: "block+" },
@@ -42,7 +71,7 @@ describe("markFromMdast", () => {
       },
     });
 
-    expect(markFromMdast({ type: "strong", children: [] }, bare)).toBeNull();
+    expect(markFromMdast(node, bare)).toBeNull();
   });
 });
 
@@ -106,6 +135,44 @@ describe("inlineFromMdast", () => {
 
     expect(nodes).toHaveLength(0);
   });
+
+  it("keeps wrapper children when the schema lacks the wrapper mark", () => {
+    const bare = new Schema({
+      nodes: {
+        doc: { content: "block+" },
+        text: { group: "inline" },
+        paragraph: { group: "block", content: "inline*" },
+      },
+    });
+    const nodes = inlineFromMdast(
+      [{ type: "strong", children: [{ type: "text", value: "x" }] }],
+      bare,
+    );
+
+    expect(nodes.map((node) => node.text)).toEqual(["x"]);
+    expect(nodes[0]?.marks).toEqual([]);
+  });
+
+  it("applies a custom mark to a leaf value node", () => {
+    const highlight = { type: "highlight", value: "x" } as unknown as PhrasingContent;
+    const nodes = inlineFromMdast([highlight], schema, {
+      markFromMdast: (node) =>
+        (node as { type: string }).type === "highlight"
+          ? (schema.marks.highlight?.create() ?? null)
+          : null,
+    });
+
+    expect(nodes.map((node) => node.text)).toEqual(["x"]);
+    expect(nodes[0]?.marks.map((mark) => mark.type.name)).toEqual(["highlight"]);
+  });
+
+  it("ignores custom mark nodes without children or value", () => {
+    const nodes = inlineFromMdast([{ type: "highlight" } as unknown as PhrasingContent], schema, {
+      markFromMdast: () => schema.marks.highlight?.create() ?? null,
+    });
+
+    expect(nodes).toEqual([]);
+  });
 });
 
 describe("inlineToMdast", () => {
@@ -159,6 +226,14 @@ describe("inlineToMdast", () => {
   it("emits unmarked text verbatim", () => {
     expect(inlineToMdast([schema.text("plain")])).toEqual([{ type: "text", value: "plain" }]);
   });
+
+  it("merges repeated references to the same text node", () => {
+    const text = schema.text("a", [schema.marks.strong.create()]);
+
+    expect(inlineToMdast([text, text])).toEqual([
+      { type: "strong", children: [{ type: "text", value: "aa" }] },
+    ]);
+  });
 });
 
 describe("mark helper edge cases", () => {
@@ -181,6 +256,23 @@ describe("mark helper edge cases", () => {
     ]);
 
     expect(inlineToMdast([schema.text("a", [link.create({})])])).toEqual([
+      {
+        type: "link",
+        url: "",
+        title: null,
+        children: [{ type: "text", value: "a" }],
+      },
+    ]);
+  });
+
+  it("falls back to an empty URL for non-string link hrefs", () => {
+    const link = schema.marks.link;
+
+    if (!link) {
+      throw new Error("Missing link mark.");
+    }
+
+    expect(inlineToMdast([schema.text("a", [link.create({ href: 42 })])])).toEqual([
       {
         type: "link",
         url: "",

@@ -91,6 +91,41 @@ describe("fromMdastRoot", () => {
     expect(fromMdastRoot(mdast, schema, manager.markdown, "preserve").textContent).toBe("x");
   });
 
+  it("drops unknown block values when the schema has no paragraph", () => {
+    const noParagraph = new Schema({
+      nodes: {
+        doc: { content: "block+" },
+        text: { group: "inline" },
+        heading: { group: "block", content: "inline*" },
+      },
+    });
+    const mdast = root([{ type: "code", value: "x" }]);
+
+    expect(fromMdastRoot(mdast, noParagraph, emptyHandlers, "preserve").textContent).toBe("");
+  });
+
+  it("throws when preserved content does not fit the document", () => {
+    const strict = new Schema({
+      nodes: {
+        doc: { content: "paragraph+" },
+        text: { group: "inline" },
+        paragraph: { group: "block", content: "inline*" },
+        blockquote: { group: "block", content: "block+" },
+      },
+    });
+    const handlers: CollectedMarkdown = {
+      ...emptyHandlers,
+      fromMdast: {
+        blockquote: () => strict.nodes.blockquote?.create() ?? null,
+      },
+    };
+    const mdast = root([{ type: "blockquote", children: [] }]);
+
+    expect(() => fromMdastRoot(mdast, strict, handlers, "preserve")).toThrow(
+      /Could not build a document/,
+    );
+  });
+
   it("preserves unknown inline children and literal values", () => {
     const paragraph = (child: PhrasingContent): Root =>
       root([{ type: "paragraph", children: [child] }]);
@@ -217,6 +252,24 @@ describe("toMdastRoot", () => {
 });
 
 describe("handler helpers", () => {
+  it("preserves inline content when an inline handler returns null", () => {
+    const handlers: CollectedMarkdown = {
+      ...manager.markdown,
+      fromMdast: {
+        ...manager.markdown.fromMdast,
+        delete: () => null,
+      },
+    };
+    const mdast = root([
+      {
+        type: "paragraph",
+        children: [{ type: "delete", children: [{ type: "text", value: "gone" }] }],
+      },
+    ]);
+
+    expect(fromMdastRoot(mdast, schema, handlers, "preserve").textContent).toBe("gone");
+  });
+
   it("uses registered inline handlers", () => {
     const handlers: CollectedMarkdown = {
       ...manager.markdown,
@@ -251,6 +304,33 @@ describe("handler helpers", () => {
     };
 
     expect(fromMdastRoot(root([]), schema, handlers, "throw").textContent).toBe("t");
+  });
+
+  it("leaves block nodes unchanged when applying marks", () => {
+    const handlers: CollectedMarkdown = {
+      ...manager.markdown,
+      fromMdast: {
+        ...manager.markdown.fromMdast,
+        root: (_node, state) => {
+          const doc = state.schema.nodes.doc;
+          const paragraph = state.schema.nodes.paragraph;
+          const strong = state.schema.marks.strong;
+
+          if (!doc || !paragraph || !strong) {
+            return null;
+          }
+
+          const block = paragraph.create(null, state.schema.text("x"));
+          const marked = state.withMarks(block, [strong.create()]);
+
+          expect(marked).toBe(block);
+
+          return doc.create(null, [block]);
+        },
+      },
+    };
+
+    expect(fromMdastRoot(root([]), schema, handlers, "throw").textContent).toBe("x");
   });
 
   it("supports withMarks and array root results", () => {
@@ -336,5 +416,31 @@ describe("handler helpers", () => {
     expect(toMdastRoot(doc, handlers, "throw").children[0]).toMatchObject({
       children: [{ type: "text", value: "x" }],
     });
+  });
+
+  it("returns empty text for non-text nodes in the text helper", () => {
+    let text: Content | undefined;
+    const handlers: CollectedMarkdown = {
+      ...manager.markdown,
+      toMdast: {
+        ...manager.markdown.toMdast,
+        paragraph: (_node, state) => {
+          const paragraph = state.schema.nodes.paragraph;
+
+          if (!paragraph) {
+            return null;
+          }
+
+          text = state.text(paragraph.create());
+
+          return { type: "paragraph", children: [] };
+        },
+      },
+    };
+    const doc = schema.node("doc", null, [schema.node("paragraph")]);
+
+    toMdastRoot(doc, handlers, "throw");
+
+    expect(text).toEqual({ type: "text", value: "" });
   });
 });

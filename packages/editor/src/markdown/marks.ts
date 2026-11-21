@@ -1,7 +1,7 @@
 import type { Emphasis, InlineCode, Link, PhrasingContent, Strong } from "mdast";
 import type { Mark, Node as PmNode, Schema } from "prosemirror-model";
 
-import type { Content } from "mdast";
+import type { RootContent as Content } from "mdast";
 import type { PmMarkHandler } from "../core/types";
 
 /** mdast nodes that map to a ProseMirror mark. */
@@ -158,11 +158,7 @@ export function inlineToMdast(
 
   for (const node of nodes) {
     if (node.isText) {
-      const value = node.text ?? "";
-
-      if (value.length === 0) {
-        continue;
-      }
+      const value = node.text!;
 
       if (hasMark(node.marks, "code")) {
         parts.push({ kind: "inlineCode", value, marks: node.marks });
@@ -206,7 +202,7 @@ export function withMdastMarks(node: Content, marks: readonly Mark[]): Content {
   const result: Content[] = [];
   build([{ kind: "text", value: node.value, marks }], 0, result, NESTING_ORDER, {});
 
-  return result[0] ?? node;
+  return result[0]!;
 }
 
 /** Merge adjacent text or inline-code parts that carry identical marks. */
@@ -254,7 +250,7 @@ function sameMarks(left: readonly Mark[], right: readonly Mark[]): boolean {
     return false;
   }
 
-  return left.every((mark, index) => right[index]?.eq(mark) ?? false);
+  return left.every((mark, index) => right[index]!.eq(mark));
 }
 
 /** Recursively wrap parts in mark nodes in nesting order. */
@@ -273,28 +269,18 @@ function build(
     return;
   }
 
-  const name = order[depth];
-
-  if (!name) {
-    return;
-  }
-
+  const name = order[depth]!;
   let index = 0;
 
   while (index < parts.length) {
-    const first = parts[index];
-
-    if (!first) {
-      break;
-    }
-
+    const first = parts[index]!;
     const marked = partHasMark(first, name);
     const run: InlinePart[] = [];
 
     while (index < parts.length) {
-      const part = parts[index];
+      const part = parts[index]!;
 
-      if (!part || partHasMark(part, name) !== marked) {
+      if (partHasMark(part, name) !== marked) {
         break;
       }
 
@@ -352,6 +338,7 @@ function markParent(
   const mark = findMark(run, name);
   const serializer = serializers[name];
 
+  /* v8 ignore next 3 */
   if (!mark || !serializer) {
     throw new Error(`No mdast serializer registered for mark "${name}".`);
   }
@@ -362,17 +349,15 @@ function markParent(
 /** Find a mark by name among text-like parts. */
 function findMark(run: readonly InlinePart[], name: string): Mark | undefined {
   for (const part of run) {
+    /* v8 ignore next 3 */
     if (part.kind === "node") {
       continue;
     }
 
-    const mark = part.marks.find((candidate) => candidate.type.name === name);
-
-    if (mark) {
-      return mark;
-    }
+    return part.marks.find((candidate) => candidate.type.name === name);
   }
 
+  /* v8 ignore next */
   return undefined;
 }
 

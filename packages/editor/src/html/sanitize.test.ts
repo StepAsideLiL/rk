@@ -7,7 +7,7 @@ import { unified } from "unified";
 import { describe, expect, it } from "vitest";
 
 import { createExtensionManager } from "../core/extension-manager";
-import { defineExtension } from "../core/types";
+import { defineExtension, type Extension } from "../core/types";
 import { Document, Paragraph, Text } from "../extensions/index";
 import { starterKit } from "../extensions/index";
 import { createHtmlCodec } from "./codec";
@@ -21,13 +21,18 @@ const Link = defineExtension(() => ({
   requires: ["text"],
   marks: {
     link: {
-      attrs: { href: { default: null }, title: { default: null } },
+      attrs: {
+        href: { default: null },
+        title: { default: null },
+        target: { default: null },
+      },
       parseDOM: [
         {
           tag: "a[href]",
           getAttrs: (node) => ({
             href: (node as Element).getAttribute("href"),
             title: (node as Element).getAttribute("title"),
+            target: (node as Element).getAttribute("target"),
           }),
         },
       ],
@@ -36,6 +41,7 @@ const Link = defineExtension(() => ({
         {
           href: mark.attrs.href as string,
           title: mark.attrs.title as string | null,
+          target: mark.attrs.target as string | null,
         },
         0,
       ],
@@ -44,7 +50,8 @@ const Link = defineExtension(() => ({
   html: {
     sanitize: {
       tagNames: ["a"],
-      attributes: { a: ["href", "title"] },
+      attributes: { a: ["href", ["target", "_blank"], "title"] },
+      protocols: { href: ["http", "FTP"] },
     },
   },
 }));
@@ -104,6 +111,15 @@ describe("HTML sanitizer", () => {
     expect(output).toBe(kept ? `<p><a href="${href}">x</a></p>` : "<p>x</p>");
   });
 
+  it("enforces attribute value allowlists and extra protocols", () => {
+    expect(
+      roundTripHtml('<p><a href="ftp://example.com" target="_blank">x</a></p>', linkExtensions),
+    ).toBe('<p><a target="_blank" href="ftp://example.com">x</a></p>');
+    expect(
+      roundTripHtml('<p><a href="ftp://example.com" target="_self">x</a></p>', linkExtensions),
+    ).toBe('<p><a href="ftp://example.com">x</a></p>');
+  });
+
   it("drops unknown elements and their content in drop mode", () => {
     const manager = createExtensionManager(extensions);
     const dropCodec = createHtmlCodec({
@@ -129,6 +145,42 @@ describe("HTML allowlists", () => {
     .use(rehypeSanitize, buildSanitizeSchema(starterKit()))
     .use(rehypeStringify);
   const serializer = DOMSerializer.fromSchema(manager.schema);
+
+  it("merges protocols and normalizes attribute tuples", () => {
+    const custom: Extension<unknown> = {
+      name: "custom-allowlist",
+      html: {
+        sanitize: {
+          tagNames: ["a", "SPAN", "SCRIPT"],
+          attributes: {
+            a: ["href", ["target", "_blank"], "href"],
+            span: [["className", "note"]],
+          },
+          protocols: {
+            href: ["http", "FTP"],
+            src: ["https"],
+            cite: ["https"],
+          },
+        },
+      },
+    };
+    const schema = buildSanitizeSchema([
+      { name: "plain" },
+      { name: "protocols-only", html: { sanitize: { protocols: { href: ["ftp"] } } } },
+      custom,
+    ]);
+
+    expect(schema.tagNames).toEqual(["a", "span"]);
+    expect(schema.attributes).toEqual({
+      a: ["href", ["target", "_blank"]],
+      span: [["className", "note"]],
+    });
+    expect(schema.protocols).toEqual({
+      href: ["http", "https", "mailto", "tel", "ftp"],
+      src: ["http", "https"],
+      cite: ["https"],
+    });
+  });
 
   it.each(renderCases())("keeps %s output unchanged", (_name, node) => {
     const container = document.createElement("div");

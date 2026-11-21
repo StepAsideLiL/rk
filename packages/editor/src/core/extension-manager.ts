@@ -240,7 +240,7 @@ function createPlugins(
   for (const priority of priorities) {
     const bindings: Record<string, Command> = {};
 
-    for (const extension of tiers.get(priority) ?? []) {
+    for (const extension of tiers.get(priority)!) {
       for (const [name, command] of Object.entries(extension.keymap?.(context) ?? {})) {
         if (!(name in bindings)) {
           bindings[name] = command;

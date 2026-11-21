@@ -41,6 +41,7 @@ export function fromMdastRoot(
   if (strategy === "drop") {
     const doc = schema.topNodeType.createAndFill();
 
+    /* v8 ignore next 3 */
     if (!doc) {
       throw new Error("Could not create an empty document for the assembled schema.");
     }
@@ -272,7 +273,7 @@ function preservePmNode(
   }
 
   if (node.isText) {
-    return [{ type: "text", value: node.text ?? "" }];
+    return [{ type: "text", value: node.text! }];
   }
 
   if (node.isInline) {

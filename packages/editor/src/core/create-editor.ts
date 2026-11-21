@@ -330,6 +330,7 @@ function resolveContent(
   if (content === undefined) {
     const doc = schema.topNodeType.createAndFill();
 
+    /* v8 ignore next 3 */
     if (!doc) {
       throw new Error("Could not create an empty document for the assembled schema.");
     }

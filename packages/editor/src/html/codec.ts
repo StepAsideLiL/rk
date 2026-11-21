@@ -2,7 +2,7 @@ import type { Schema } from "prosemirror-model";
 import { DOMSerializer, DOMParser as PmDOMParser } from "prosemirror-model";
 import type { Node as PmNode } from "prosemirror-model";
 import rehypeParse from "rehype-parse";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { type Options as SanitizeSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import { unified, type PluggableList } from "unified";
 
@@ -91,13 +91,14 @@ export function createHtmlCodec(options: CreateHtmlCodecOptions): ContentCodec {
 
 /** Create the parse → sanitize → stringify processor once per codec. */
 function createSanitizeProcessor(
-  schema: Parameters<typeof rehypeSanitize>[0],
+  schema: SanitizeSchema,
   strategy: UnknownElementStrategy | undefined,
 ) {
   const plugins: PluggableList = [];
 
   if ((strategy ?? "unwrap") === "drop") {
-    plugins.push(rehypeDropDisallowed(schema?.tagNames ?? []));
+    // `buildSanitizeSchema` always sets tagNames.
+    plugins.push(rehypeDropDisallowed(schema.tagNames!));
   }
 
   plugins.push([rehypeSanitize, schema], rehypeStringify);

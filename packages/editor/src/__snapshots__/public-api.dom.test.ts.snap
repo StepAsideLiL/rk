@@ -27,6 +27,7 @@ exports[`public API > snapshots the ./extensions entry 1`] = `
   "MARK_NAMES",
   "NODE_NAMES",
   "Paragraph",
+  "Selection",
   "Text",
   "getMarkType",
   "getNodeType",

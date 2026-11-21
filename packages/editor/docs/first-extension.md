@@ -206,7 +206,7 @@ export { Highlight } from "./highlight/highlight";
 
 // starterKit
 export function starterKit() {
-  return [Document(), Text(), Paragraph(), Heading({}), Bold(), Italic(), Highlight()];
+  return [Document(), Text(), Paragraph(), Heading({}), Bold(), Italic(), Selection(), Highlight()];
 }
 ```
 

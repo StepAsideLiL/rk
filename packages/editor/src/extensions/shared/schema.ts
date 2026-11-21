@@ -8,6 +8,7 @@ export const EXTENSION_NAMES = Object.freeze({
   heading: "heading",
   bold: "bold",
   italic: "italic",
+  selection: "selection",
 } as const);
 
 /** Node names shared between extensions. */

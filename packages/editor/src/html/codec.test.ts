@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
-import { createHtmlCodec } from "./codec";
+import { ExtensionManager } from "../core/extension-manager";
+import { HtmlCodec } from "./codec";
 import { codec, extensions, roundTripHtml } from "./fixtures.test-utils";
 
-const manager = createExtensionManager(extensions);
+const manager = new ExtensionManager(extensions);
 
 describe("HTML codec", () => {
   it.each([
@@ -56,7 +56,7 @@ describe("HTML codec", () => {
   });
 
   it("constructs without a document and waits until use to throw", () => {
-    const withoutDocument = createHtmlCodec({ extensions });
+    const withoutDocument = new HtmlCodec({ extensions });
 
     expect(() => withoutDocument.parse("<p>x</p>", manager.schema)).toThrow(/DOM document/);
     expect(() =>

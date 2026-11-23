@@ -1,7 +1,7 @@
 import { TextSelection } from "prosemirror-state";
 import { describe, expect, it } from "vitest";
 
-import type { Editor } from "../../core/create-editor";
+import type { EditorCore } from "../../core/editor";
 import { createTestEditor, docOf, press, roundTrip, textOf, typeText } from "../../testing";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
@@ -10,7 +10,7 @@ import { Italic } from "./italic";
 
 const extensions = () => [Document(), Text(), Paragraph(), Italic()];
 
-const markNames = (editor: Editor): string[] => {
+const markNames = (editor: EditorCore): string[] => {
   const names = new Set<string>();
 
   docOf(editor).descendants((node) => {
@@ -24,7 +24,7 @@ const markNames = (editor: Editor): string[] => {
   return [...names];
 };
 
-const selectAll = (editor: Editor): void => {
+const selectAll = (editor: EditorCore): void => {
   editor.dispatch(
     editor.state.tr.setSelection(
       TextSelection.create(editor.state.doc, 1, editor.state.doc.content.size - 1),

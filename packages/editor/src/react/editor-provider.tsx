@@ -4,12 +4,11 @@ import { createContext, useEffect, useRef, useState, type ReactNode } from "reac
 
 import {
   CONTROLLED_UPDATE_META,
-  type Editor,
   type EditorContent as EditorContentValue,
   type EditorContentType,
-} from "../core/create-editor";
-import type { ContentCodec, ContentType, Extension, MarkdownCodec } from "../core/types";
-import { createEditor } from "../editor";
+} from "../core/editor";
+import type { ContentCodec, ContentType, Extension } from "../core/types";
+import { Editor } from "../editor";
 
 /** Serialized format passed to `onChange` when `outputFormat` is set. */
 export type EditorOutputFormat = ContentType;
@@ -25,8 +24,8 @@ export interface EditorProviderProps {
   /** Interpretation of string content. Defaults to `"json"`. */
   readonly contentType?: EditorContentType;
 
-  /** Markdown codec from `createMarkdownCodec`, kept for compatibility. */
-  readonly markdown?: MarkdownCodec;
+  /** Markdown codec from `MarkdownCodec`, kept for compatibility. */
+  readonly markdown?: ContentCodec;
 
   /** Optional codec overrides keyed by content type. */
   readonly codecs?: Partial<Record<ContentType, ContentCodec>>;
@@ -72,7 +71,7 @@ export function EditorProvider({
   const [editor, setEditor] = useState<Editor | null>(null);
 
   useEffect(() => {
-    const instance = createEditor(initial.current);
+    const instance = new Editor(initial.current);
 
     setEditor(instance);
 

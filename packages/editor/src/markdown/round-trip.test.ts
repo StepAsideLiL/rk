@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createEditor } from "../core/create-editor";
-import { createExtensionManager } from "../core/extension-manager";
-import { createMarkdownCodec } from "./codec";
+import { EditorCore } from "../core/editor";
+import { ExtensionManager } from "../core/extension-manager";
+import { MarkdownCodec } from "./codec";
 import { testExtensions } from "./fixtures.test-utils";
 
-const manager = createExtensionManager(testExtensions);
+const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;
-const codec = createMarkdownCodec({ extensions: testExtensions });
+const codec = new MarkdownCodec({ extensions: testExtensions });
 
 function roundTrip(markdown: string): string {
   const doc = codec.parse(markdown, schema);
@@ -47,7 +47,7 @@ describe("markdown normalization", () => {
 
 describe("editor markdown integration", () => {
   it("parses markdown content and serializes with getMarkdown", () => {
-    const editor = createEditor({
+    const editor = new EditorCore({
       extensions: testExtensions,
       markdown: codec,
       content: "**a *b* c**",
@@ -60,15 +60,16 @@ describe("editor markdown integration", () => {
   });
 
   it("requires the codec for markdown content and getMarkdown", () => {
-    expect(() =>
-      createEditor({
-        extensions: testExtensions,
-        content: "x",
-        contentType: "markdown",
-      }),
+    expect(
+      () =>
+        new EditorCore({
+          extensions: testExtensions,
+          content: "x",
+          contentType: "markdown",
+        }),
     ).toThrow(/markdown codec/);
 
-    const editor = createEditor({ extensions: testExtensions });
+    const editor = new EditorCore({ extensions: testExtensions });
     expect(() => editor.getMarkdown()).toThrow(/markdown codec/);
     editor.destroy();
   });

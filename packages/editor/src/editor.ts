@@ -1,26 +1,30 @@
-import {
-  createEditor as createCoreEditor,
-  jsonCodec,
-  type CreateEditorOptions,
-  type Editor,
-} from "./core/index";
-import { createHtmlCodec } from "./html/index";
-import { createMarkdownCodec } from "./markdown/index";
+import { EditorCore, jsonCodec, type EditorOptions } from "./core/editor";
+import { HtmlCodec } from "./html/codec";
+import { MarkdownCodec } from "./markdown/codec";
 
 /**
- * Create an editor with the default markdown, HTML and JSON codecs.
+ * Editor with the default markdown, HTML and JSON codecs.
  *
- * Core stays codec-free: this wrapper is the assembly point that knows about
- * the concrete codec modules. Pass `codecs` or the legacy `markdown` option to
+ * Core stays codec-free: this class is the assembly point that knows about the
+ * concrete codec modules. Pass `codecs` or the legacy `markdown` option to
  * override any of them.
  */
-export function createEditor(options: CreateEditorOptions): Editor {
-  const extensions = options.extensions;
-  const codecs = {
-    json: options.codecs?.json ?? jsonCodec,
-    markdown: options.codecs?.markdown ?? options.markdown ?? createMarkdownCodec({ extensions }),
-    html: options.codecs?.html ?? createHtmlCodec({ extensions }),
-  };
+export class Editor extends EditorCore {
+  constructor(options: EditorOptions) {
+    super(withDefaultCodecs(options));
+  }
+}
 
-  return createCoreEditor({ ...options, codecs });
+/** Fill in the codec defaults without mutating the caller's options. */
+function withDefaultCodecs(options: EditorOptions): EditorOptions {
+  const extensions = options.extensions;
+
+  return {
+    ...options,
+    codecs: {
+      json: options.codecs?.json ?? jsonCodec,
+      markdown: options.codecs?.markdown ?? options.markdown ?? new MarkdownCodec({ extensions }),
+      html: options.codecs?.html ?? new HtmlCodec({ extensions }),
+    },
+  };
 }

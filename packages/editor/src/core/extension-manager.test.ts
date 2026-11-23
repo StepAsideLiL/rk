@@ -4,7 +4,7 @@ import { EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type { Plugin as UnifiedPlugin } from "unified";
 
-import { createExtensionManager } from "./extension-manager";
+import { ExtensionManager } from "./extension-manager";
 import type { CommandRegistry, Extension, ExtensionContext } from "./types";
 
 const documentExtension = (priority = 100): Extension<unknown> => ({
@@ -57,33 +57,35 @@ const testContext = (schema: Schema): ExtensionContext => {
   };
 };
 
-describe("createExtensionManager", () => {
+describe("ExtensionManager", () => {
   it("rejects duplicate extension names", () => {
-    expect(() =>
-      createExtensionManager([documentExtension(), extension("bold"), extension("bold")]),
+    expect(
+      () => new ExtensionManager([documentExtension(), extension("bold"), extension("bold")]),
     ).toThrow('Duplicate extension name "bold"');
   });
 
   it("rejects missing requirements with both names in the message", () => {
-    expect(() =>
-      createExtensionManager([documentExtension(), extension("bold", { requires: ["italic"] })]),
+    expect(
+      () =>
+        new ExtensionManager([documentExtension(), extension("bold", { requires: ["italic"] })]),
     ).toThrow('Extension "bold" requires "italic", which is not installed.');
   });
 
   it("rejects schemas without a doc node", () => {
-    expect(() =>
-      createExtensionManager([
-        extension("paragraph", {
-          nodes: { paragraph: { group: "block", content: "inline*" } },
-        }),
-      ]),
+    expect(
+      () =>
+        new ExtensionManager([
+          extension("paragraph", {
+            nodes: { paragraph: { group: "block", content: "inline*" } },
+          }),
+        ]),
     ).toThrow(/missing a "doc" node/);
   });
 
   it("lets the earlier extension win inside one priority tier", () => {
     const first = vi.fn(() => true);
     const second = vi.fn(() => true);
-    const manager = createExtensionManager([
+    const manager = new ExtensionManager([
       documentExtension(),
       paragraphExtension(),
       extension("first", { priority: 5, keymap: () => ({ Enter: first }) }),
@@ -108,7 +110,7 @@ describe("createExtensionManager", () => {
   });
 
   it("orders the default block by priority", () => {
-    const paragraphFirst = createExtensionManager([
+    const paragraphFirst = new ExtensionManager([
       documentExtension(),
       paragraphExtension(0),
       headingExtension(200),
@@ -116,7 +118,7 @@ describe("createExtensionManager", () => {
     const paragraphDoc = paragraphFirst.schema.topNodeType.createAndFill();
     expect(paragraphDoc?.firstChild?.type.name).toBe("paragraph");
 
-    const headingFirst = createExtensionManager([
+    const headingFirst = new ExtensionManager([
       documentExtension(),
       paragraphExtension(200),
       headingExtension(0),
@@ -126,7 +128,7 @@ describe("createExtensionManager", () => {
   });
 
   it("merges nodes and marks from several extensions", () => {
-    const manager = createExtensionManager([
+    const manager = new ExtensionManager([
       documentExtension(),
       paragraphExtension(),
       extension("strong", { marks: { strong: { toDOM: () => ["strong", 0] } } }),
@@ -140,7 +142,7 @@ describe("createExtensionManager", () => {
   it("lets the higher-priority keymap binding win", () => {
     const high = vi.fn(() => true);
     const low = vi.fn(() => true);
-    const manager = createExtensionManager([
+    const manager = new ExtensionManager([
       documentExtension(),
       paragraphExtension(),
       extension("low", { priority: 10, keymap: () => ({ Enter: low }) }),
@@ -172,7 +174,7 @@ describe("createExtensionManager", () => {
     const lowHandler = vi.fn(() => null);
     const highHandler = vi.fn(() => null);
     const remarkPlugin = (() => undefined) as unknown as UnifiedPlugin;
-    const manager = createExtensionManager([
+    const manager = new ExtensionManager([
       documentExtension(),
       paragraphExtension(),
       extension("low", {

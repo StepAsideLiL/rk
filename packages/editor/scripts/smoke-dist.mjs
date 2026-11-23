@@ -1,12 +1,12 @@
-import { createMarkdownCodec } from "@rk/editor";
+import { MarkdownCodec } from "@rk/editor";
 import { starterKit } from "@rk/editor/extensions";
-import { createHtmlCodec } from "@rk/editor/html";
+import { HtmlCodec } from "@rk/editor/html";
 import { EditorProvider } from "@rk/editor/react";
 import { createTestEditor } from "@rk/editor/testing";
 
 const extensions = starterKit();
-const codec = createMarkdownCodec({ extensions });
-const htmlCodec = createHtmlCodec({ extensions });
+const codec = new MarkdownCodec({ extensions });
+const htmlCodec = new HtmlCodec({ extensions });
 const editor = createTestEditor(extensions, "**built** package");
 
 editor.state.doc.check();

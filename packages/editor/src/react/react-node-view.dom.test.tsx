@@ -2,11 +2,11 @@ import { act } from "@testing-library/react";
 import { DecorationSet, type NodeView, type EditorView } from "prosemirror-view";
 import { expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
+import { ExtensionManager } from "../core/extension-manager";
 import { starterKit } from "../extensions/index";
 import { createReactNodeView, type ReactNodeViewProps } from "./react-node-view";
 
-const manager = createExtensionManager(starterKit());
+const manager = new ExtensionManager(starterKit());
 
 function Label({ node }: ReactNodeViewProps) {
   return <span>{node.textContent}</span>;

@@ -2,8 +2,8 @@ import { AllSelection, NodeSelection, TextSelection } from "prosemirror-state";
 import { DecorationSet } from "prosemirror-view";
 import { describe, expect, it } from "vitest";
 
-import { createEditor, type Editor } from "../../core/create-editor";
-import { createExtensionManager } from "../../core/extension-manager";
+import { EditorCore } from "../../core/editor";
+import { ExtensionManager } from "../../core/extension-manager";
 import type { Extension } from "../../core/types";
 import { createTestEditor } from "../../testing";
 import { Document } from "../document/document";
@@ -24,7 +24,7 @@ const ruleExtension: Extension<unknown> = {
   },
 };
 
-const decorationsOf = (editor: Editor): DecorationSet | null => {
+const decorationsOf = (editor: EditorCore): DecorationSet | null => {
   const plugin = editor.state.plugins.find((candidate) => candidate.props.decorations);
 
   if (!plugin?.props.decorations) {
@@ -34,11 +34,11 @@ const decorationsOf = (editor: Editor): DecorationSet | null => {
   return plugin.props.decorations.call(plugin, editor.state) as DecorationSet | null;
 };
 
-const select = (editor: Editor, from: number, to: number): void => {
+const select = (editor: EditorCore, from: number, to: number): void => {
   editor.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, from, to)));
 };
 
-const setFocused = (editor: Editor, focused: boolean): void => {
+const setFocused = (editor: EditorCore, focused: boolean): void => {
   editor.dispatch(editor.state.tr.setMeta(selectionFocusKey, focused));
 };
 
@@ -81,12 +81,12 @@ describe("Selection", () => {
 
   it("decorates a node selection", () => {
     const allExtensions = [...extensions(), ruleExtension];
-    const schema = createExtensionManager(allExtensions).schema;
+    const schema = new ExtensionManager(allExtensions).schema;
     const doc = schema.node("doc", null, [
       schema.node("paragraph", null, schema.text("a")),
       schema.node("rule"),
     ]);
-    const editor = createEditor({ extensions: allExtensions, content: doc });
+    const editor = new EditorCore({ extensions: allExtensions, content: doc });
 
     editor.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 3)));
     setFocused(editor, false);

@@ -18,7 +18,7 @@ each extension's `parseDOM`/`toDOM` specs.
 ## Layout
 
 - `src/core` — types, `defineExtension`, `ExtensionManager`, the codec-injected
-  editor factory and content codec contracts. No DOM, no imports from sibling
+  editor class and content codec contracts. No DOM, no imports from sibling
   folders.
 - `src/markdown` — unified pipeline, mdast ↔ ProseMirror conversion, shared mark
   helpers. No DOM.
@@ -26,8 +26,8 @@ each extension's `parseDOM`/`toDOM` specs.
   sanitizer schema merging. No imports outside core.
 - `src/extensions` — one folder per feature, plus `shared/` helpers and
   `starterKit()`.
-- `src/editor.ts` — public `createEditor` wrapper that assembles the markdown,
-  HTML and JSON codecs.
+- `src/editor.ts` — public `Editor` class that assembles the markdown, HTML and
+  JSON codecs.
 - `src/react` — provider, hooks, `EditorContent`, `createReactNodeView`.
 - `src/testing` — `createTestEditor`, `roundTrip`, `docOf`, `textOf`, `press`,
   `typeText`.
@@ -53,13 +53,17 @@ each extension's `parseDOM`/`toDOM` specs.
   visual-only UI.
 - Plugin views and NodeViews must clean up listeners, observers, timers and
   React roots in `destroy()`.
-- TypeScript strict; no `any` without a comment. Prefer factories and plain
-  objects.
+- TypeScript strict; no `any` without a comment. Prefer classes for stateful
+  collaborators (`Editor`, `ExtensionManager`, codecs) and plain objects or
+  identity factories for declarative extensions.
 - Every extension ships with Vitest tests: round trips, `doc.check()`, commands,
   input rules and keymaps. NodeView tests use `*.dom.test.ts`.
 - Keep dependency direction: core → nothing internal, markdown → core, html →
-  core, extensions → core, react → the public editor wrapper. oxlint enforces
+  core, extensions → core, react → the public editor class. oxlint enforces
   imports and DOM-free core/markdown.
+- Keep exports one-way: import concrete modules, never a barrel that re-exports
+  the importer. `src/index.ts` is the root assembly point; nothing inside the
+  package imports it.
 
 ## Building and checking
 

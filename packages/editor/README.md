@@ -5,14 +5,14 @@ declarative extensions over ProseMirror.
 
 ## Layout
 
-| Path              | Purpose                                                |
-| ----------------- | ------------------------------------------------------ |
-| `src/core/`       | Types, extension manager and editor factory. DOM-free. |
-| `src/markdown/`   | unified pipeline and mdast <-> ProseMirror handlers.   |
-| `src/html/`       | Sanitized rehype pipeline and HTML codec.              |
-| `src/extensions/` | One folder per feature.                                |
-| `src/react/`      | React provider, hooks and NodeView helper.             |
-| `src/testing/`    | Test helpers, exported as `@rk/editor/testing`.        |
+| Path              | Purpose                                                              |
+| ----------------- | -------------------------------------------------------------------- |
+| `src/core/`       | Types, `ExtensionManager` and codec-injected `EditorCore`. DOM-free. |
+| `src/markdown/`   | unified pipeline and mdast <-> ProseMirror handlers.                 |
+| `src/html/`       | Sanitized rehype pipeline and HTML codec.                            |
+| `src/extensions/` | One folder per feature.                                              |
+| `src/react/`      | React provider, hooks and NodeView helper.                           |
+| `src/testing/`    | Test helpers, exported as `@rk/editor/testing`.                      |
 
 ## Scripts
 
@@ -24,7 +24,7 @@ pnpm lint
 ```
 
 Consumers use `@rk/editor`, `@rk/editor/react`, `@rk/editor/extensions`,
-`@rk/editor/html` and `@rk/editor/testing`. `createEditor` wires the markdown,
+`@rk/editor/html` and `@rk/editor/testing`. The `Editor` class wires the markdown,
 HTML and JSON codecs by default. The interactive demo runs in the workspace
 playground at `/editor` (`pnpm playground` from the repo root).
 

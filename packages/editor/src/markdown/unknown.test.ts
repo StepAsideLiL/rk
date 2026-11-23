@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
-import { createMarkdownCodec } from "./codec";
+import { ExtensionManager } from "../core/extension-manager";
+import { MarkdownCodec } from "./codec";
 import { testExtensions } from "./fixtures.test-utils";
 
-const manager = createExtensionManager(testExtensions);
+const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;
 
 const codecs = {
-  throw: createMarkdownCodec({ extensions: testExtensions, unknownNode: "throw" }),
-  drop: createMarkdownCodec({ extensions: testExtensions, unknownNode: "drop" }),
-  preserve: createMarkdownCodec({
+  throw: new MarkdownCodec({ extensions: testExtensions, unknownNode: "throw" }),
+  drop: new MarkdownCodec({ extensions: testExtensions, unknownNode: "drop" }),
+  preserve: new MarkdownCodec({
     extensions: testExtensions,
     unknownNode: "preserve",
   }),
@@ -57,7 +57,7 @@ describe("unknown ProseMirror nodes", () => {
 
 describe("default strategy", () => {
   it("throws in the development environment", () => {
-    const codec = createMarkdownCodec({ extensions: testExtensions });
+    const codec = new MarkdownCodec({ extensions: testExtensions });
 
     expect(import.meta.env.DEV).toBe(true);
     expect(() => codec.parse("> quote", schema)).toThrow(/blockquote/);

@@ -187,17 +187,17 @@ rules and the consistency test that catches missing allowlists.
 
 ### Unknown-node strategy
 
-`createMarkdownCodec({ extensions, unknownNode })` supports `"throw"`,
+`new MarkdownCodec({ extensions, unknownNode })` supports `"throw"`,
 `"drop"` and `"preserve"`. The default is `"throw"` during development and
 `"preserve"` in production builds.
 
 ### Stringify options
 
-`createMarkdownCodec({ extensions, stringify })` forwards options to
+`new MarkdownCodec({ extensions, stringify })` forwards options to
 `remark-stringify`, for example:
 
 ```ts
-createMarkdownCodec({
+new MarkdownCodec({
   extensions,
   stringify: { bullet: "-", emphasis: "*", listItemIndent: "one" },
 });
@@ -210,7 +210,7 @@ codec and editor explicitly:
 
 ```ts
 const extensions = starterKit();
-const editor = createEditor({
+const editor = new Editor({
   extensions,
   content: "# Hi",
   contentType: "markdown",
@@ -224,7 +224,7 @@ editor.getHTML();
 editor.getJSON();
 ```
 
-The public `createEditor` wrapper assembles the markdown, HTML and JSON codecs.
+The public `Editor` class assembles the markdown, HTML and JSON codecs.
 Pass `codecs` to override one, or the legacy `markdown` option to replace only
 markdown. React uses the same defaults through `<EditorProvider extensions />`.
 
@@ -235,7 +235,7 @@ markdown. React uses the same defaults through `<EditorProvider extensions />`.
 | `src/core`       | external packages only                |
 | `src/markdown`   | `src/core`                            |
 | `src/html`       | `src/core`                            |
-| `src/react`      | `src/core`, the public editor wrapper |
+| `src/react`      | `src/core`, the public `Editor` class |
 | `src/extensions` | `src/core`, shared extension helpers  |
 
 Tests may import their subject and testing helpers. oxlint enforces

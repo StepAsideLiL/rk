@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { Plugin } from "prosemirror-state";
 
-import { createEditor } from "./create-editor";
+import { EditorCore } from "./editor";
 import type { Command, Extension } from "./types";
 
 const documentExtension: Extension<unknown> = {
@@ -38,12 +38,12 @@ const insertText: Command = (state, dispatch) => {
   return true;
 };
 
-describe("createEditor with an element", () => {
+describe("EditorCore with an element", () => {
   it("mounts the view, routes view transactions and destroys plugin views", () => {
     const pluginDestroy = vi.fn();
     const plugin = new Plugin({ view: () => ({ destroy: pluginDestroy }) });
     const element = document.createElement("div");
-    const editor = createEditor({
+    const editor = new EditorCore({
       extensions: withCommand(insertText, [plugin]),
       element,
     });

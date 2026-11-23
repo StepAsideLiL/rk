@@ -1,7 +1,7 @@
 import { TextSelection } from "prosemirror-state";
 import { describe, expect, it } from "vitest";
 
-import type { Editor } from "../../core/create-editor";
+import type { EditorCore } from "../../core/editor";
 import { createTestEditor, docOf, press, roundTrip, textOf, typeText } from "../../testing";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
@@ -10,7 +10,7 @@ import { Heading } from "./heading";
 
 const extensions = () => [Document(), Text(), Paragraph(), Heading({ levels: [1, 2, 3] })];
 
-const blockType = (editor: Editor) => {
+const blockType = (editor: EditorCore) => {
   const block = docOf(editor).firstChild;
 
   return {

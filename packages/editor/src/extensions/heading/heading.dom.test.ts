@@ -1,7 +1,7 @@
 import { DOMSerializer, DOMParser as PmDOMParser } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../../core/extension-manager";
+import { ExtensionManager } from "../../core/extension-manager";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
 import { Text } from "../text/text";
@@ -9,7 +9,7 @@ import { Heading } from "./heading";
 
 const extensions = () => [Document(), Text(), Paragraph(), Heading({ levels: [1, 2, 3] })];
 
-const createSchema = () => createExtensionManager(extensions()).schema;
+const createSchema = () => new ExtensionManager(extensions()).schema;
 
 describe("Heading DOM", () => {
   it("serializes the configured heading level and parses it back", () => {

@@ -2,9 +2,10 @@ import type { Node as PmNode } from "prosemirror-model";
 import type { Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
-import { createEditor, type Editor } from "../core/create-editor";
+import { EditorCore } from "../core/editor";
 import type { Extension } from "../core/types";
-import { createMarkdownCodec } from "../markdown/index";
+import type { Editor } from "../editor";
+import { MarkdownCodec } from "../markdown/codec";
 
 /**
  * Create a headless editor for tests.
@@ -16,9 +17,9 @@ export function createTestEditor(
   extensions: readonly Extension<unknown>[],
   content?: string,
 ): Editor {
-  const markdown = createMarkdownCodec({ extensions });
+  const markdown = new MarkdownCodec({ extensions });
 
-  return createEditor({
+  return new EditorCore({
     extensions,
     markdown,
     ...(content === undefined ? {} : { content, contentType: "markdown" as const }),

@@ -2,8 +2,8 @@ import type { Extension } from "../core/types";
 import { describe, expect, it } from "vitest";
 import type { Plugin as UnifiedPlugin } from "unified";
 
-import { createExtensionManager } from "../core/extension-manager";
-import { createMarkdownCodec, defaultUnknownNodeStrategy } from "./codec";
+import { ExtensionManager } from "../core/extension-manager";
+import { MarkdownCodec, defaultUnknownNodeStrategy } from "./codec";
 import { testExtensions } from "./fixtures.test-utils";
 
 const remarkPlugin = (() => undefined) as unknown as UnifiedPlugin;
@@ -12,13 +12,13 @@ const pluginExtension: Extension<unknown> = {
   markdown: { remarkPlugins: [remarkPlugin] },
 };
 const extensions = [...testExtensions, pluginExtension];
-const manager = createExtensionManager(extensions);
-const codec = createMarkdownCodec({
+const manager = new ExtensionManager(extensions);
+const codec = new MarkdownCodec({
   extensions,
   stringify: { bullet: "+" },
 });
 
-describe("createMarkdownCodec", () => {
+describe("MarkdownCodec", () => {
   it("runs remark plugins and forwards stringify options", () => {
     const doc = codec.parse("* item", manager.schema);
 

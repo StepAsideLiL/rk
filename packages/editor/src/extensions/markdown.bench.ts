@@ -1,12 +1,12 @@
 import { test } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
+import { ExtensionManager } from "../core/extension-manager";
 import { starterKit } from "../extensions/index";
-import { createMarkdownCodec } from "../markdown/index";
+import { MarkdownCodec } from "../markdown/codec";
 
 const extensions = starterKit();
-const manager = createExtensionManager(extensions);
-const codec = createMarkdownCodec({ extensions });
+const manager = new ExtensionManager(extensions);
+const codec = new MarkdownCodec({ extensions });
 const markdown = Array.from(
   { length: 5_000 },
   (_, index) => `## Section ${index}\n\nParagraph ${index} with **bold** and *italic* text.`,

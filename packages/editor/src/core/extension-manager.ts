@@ -50,7 +50,7 @@ export interface CollectedMarkdown {
  * The manager owns schema assembly, command collection and plugin ordering. It
  * is created once per editor and stays immutable after construction.
  */
-export interface ExtensionManager {
+export class ExtensionManager {
   /** Extensions in stable, ascending priority order. */
   readonly extensions: readonly Extension<unknown>[];
 
@@ -63,45 +63,34 @@ export interface ExtensionManager {
   /** Node views merged from every extension, keyed by node type. */
   readonly nodeViews: Readonly<Record<string, NodeViewConstructor>>;
 
+  /**
+   * Validate, order and merge a set of extensions.
+   *
+   * Throws when two extensions share a name, when a `requires` entry is missing
+   * or when no `doc` node was contributed.
+   */
+  constructor(extensions: readonly Extension<unknown>[]) {
+    this.extensions = orderExtensions(extensions);
+    this.schema = mergeSchema(this.extensions);
+    this.markdown = collectMarkdown(this.extensions);
+    this.nodeViews = collectNodeViews(this.extensions);
+  }
+
   /** Collect commands from every extension, in priority order. */
-  createCommands(context: ExtensionContext): Readonly<Record<string, Command>>;
+  createCommands(context: ExtensionContext): Readonly<Record<string, Command>> {
+    const commands: Record<string, Command> = {};
+
+    for (const extension of this.extensions) {
+      Object.assign(commands, extension.commands?.(context) ?? {});
+    }
+
+    return commands;
+  }
 
   /** Build the ordered ProseMirror plugin list for an editor. */
-  createPlugins(context: ExtensionContext): readonly Plugin[];
-}
-
-/**
- * Validate, order and merge a set of extensions.
- *
- * Throws when two extensions share a name, when a `requires` entry is missing
- * or when no `doc` node was contributed.
- */
-export function createExtensionManager(
-  extensions: readonly Extension<unknown>[],
-): ExtensionManager {
-  const ordered = orderExtensions(extensions);
-  const schema = mergeSchema(ordered);
-  const markdown = collectMarkdown(ordered);
-  const nodeViews = collectNodeViews(ordered);
-
-  return {
-    extensions: ordered,
-    schema,
-    markdown,
-    nodeViews,
-    createCommands(context) {
-      const commands: Record<string, Command> = {};
-
-      for (const extension of ordered) {
-        Object.assign(commands, extension.commands?.(context) ?? {});
-      }
-
-      return commands;
-    },
-    createPlugins(context) {
-      return createPlugins(ordered, context);
-    },
-  };
+  createPlugins(context: ExtensionContext): readonly Plugin[] {
+    return createPlugins(this.extensions, context);
+  }
 }
 
 /**

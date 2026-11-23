@@ -5,10 +5,10 @@ go through mdast: markdown cannot represent underline, colspan, CSS classes and
 many other structures that HTML can.
 
 ```ts
-import { createEditor } from "@rk/editor";
+import { Editor } from "@rk/editor";
 import { starterKit } from "@rk/editor/extensions";
 
-const editor = createEditor({
+const editor = new Editor({
   extensions: starterKit(),
   content: "<h1>Hi</h1><p><strong>HTML</strong></p>",
   contentType: "html",
@@ -19,7 +19,7 @@ editor.getMarkdown();
 editor.getJSON();
 ```
 
-`createEditor` assembles the default markdown, HTML and JSON codecs. Pass
+`Editor` assembles the default markdown, HTML and JSON codecs. Pass
 `codecs` to override one, or the legacy `markdown` option to replace only the
 markdown codec.
 
@@ -51,11 +51,11 @@ The codec accepts an injectable `document`:
 
 ```ts
 import { parseHTML } from "linkedom";
-import { createHtmlCodec } from "@rk/editor/html";
+import { HtmlCodec } from "@rk/editor/html";
 import { starterKit } from "@rk/editor/extensions";
 
 const { document } = parseHTML("<!doctype html><html><body></body></html>");
-const codec = createHtmlCodec({ extensions: starterKit(), document });
+const codec = new HtmlCodec({ extensions: starterKit(), document });
 ```
 
 The document is resolved lazily inside `parse`/`serialize`, never at module
@@ -148,5 +148,5 @@ executes raw HTML.
 ## Boundaries
 
 `src/html` may import only `src/core`. Extensions do not import `src/html`, and
-core does not import codecs. The public `createEditor` wrapper is the single
-assembly point that knows about markdown and HTML.
+core does not import codecs. The public `Editor` class is the single assembly
+point that knows about markdown and HTML.

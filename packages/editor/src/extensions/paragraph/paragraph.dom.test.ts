@@ -1,14 +1,14 @@
 import { DOMSerializer, DOMParser as PmDOMParser } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../../core/extension-manager";
+import { ExtensionManager } from "../../core/extension-manager";
 import { Document } from "../document/document";
 import { Text } from "../text/text";
 import { Paragraph } from "./paragraph";
 
 const extensions = () => [Document(), Text(), Paragraph()];
 
-const createSchema = () => createExtensionManager(extensions()).schema;
+const createSchema = () => new ExtensionManager(extensions()).schema;
 
 describe("Paragraph DOM", () => {
   it("serializes paragraphs and parses them back", () => {

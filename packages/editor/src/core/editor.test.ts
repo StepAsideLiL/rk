@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { Plugin, PluginKey } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
-import { CONTROLLED_UPDATE_META, createEditor } from "./create-editor";
-import type { Command, ContentCodec, Extension, MarkdownCodec } from "./types";
+import { CONTROLLED_UPDATE_META, EditorCore } from "./editor";
+import type { Command, ContentCodec, Extension } from "./types";
 
 declare module "./types" {
   interface Commands {
@@ -34,7 +34,7 @@ const withCommand = (command: Command, extraPlugins: Plugin[] = []): Extension<u
   { name: "extra", plugins: () => extraPlugins },
 ];
 
-describe("createEditor", () => {
+describe("EditorCore", () => {
   it("runs commands without a view and never dispatches from can", () => {
     const dispatchSpy = vi.fn();
     const seenViews: Array<EditorView | undefined> = [];
@@ -50,7 +50,7 @@ describe("createEditor", () => {
       return true;
     };
 
-    const editor = createEditor({ extensions: withCommand(command) });
+    const editor = new EditorCore({ extensions: withCommand(command) });
 
     expect(editor.view).toBeUndefined();
     expect(editor.can.testCommand()).toBe(false);
@@ -73,7 +73,7 @@ describe("createEditor", () => {
       dispatch(state.tr.insertText("x"));
       return true;
     };
-    const editor = createEditor({ extensions: withCommand(command) });
+    const editor = new EditorCore({ extensions: withCommand(command) });
 
     editor.on("transaction", () => events.push("transaction"));
     editor.on("update", () => events.push("update"));
@@ -100,8 +100,8 @@ describe("createEditor", () => {
       return true;
     };
     const extensions = withCommand(command, [counter]);
-    const first = createEditor({ extensions });
-    const second = createEditor({ extensions });
+    const first = new EditorCore({ extensions });
+    const second = new EditorCore({ extensions });
 
     expect(first.state).not.toBe(second.state);
     expect(counterKey.getState(first.state)).toBe(0);
@@ -121,7 +121,7 @@ describe("createEditor", () => {
       dispatch(state.tr.insertText("x"));
       return true;
     };
-    const editor = createEditor({ extensions: withCommand(command) });
+    const editor = new EditorCore({ extensions: withCommand(command) });
     const updates = vi.fn();
     const destroys = vi.fn();
 
@@ -147,7 +147,7 @@ describe("createEditor", () => {
       dispatch(state.tr.insertText("x"));
       return true;
     };
-    const editor = createEditor({ extensions: withCommand(command) });
+    const editor = new EditorCore({ extensions: withCommand(command) });
     const updates = vi.fn();
     const unsubscribe = editor.on("update", updates);
 
@@ -157,7 +157,7 @@ describe("createEditor", () => {
   });
 
   it("parses JSON string content", () => {
-    const editor = createEditor({
+    const editor = new EditorCore({
       extensions: withCommand(() => true),
       content: JSON.stringify({
         type: "doc",
@@ -174,7 +174,7 @@ describe("createEditor", () => {
   });
 
   it("sets content with the controlled-update meta and skips no-ops", () => {
-    const editor = createEditor({ extensions: withCommand(() => true) });
+    const editor = new EditorCore({ extensions: withCommand(() => true) });
     const metas: unknown[] = [];
 
     editor.on("transaction", (transaction) => {
@@ -195,7 +195,7 @@ describe("createEditor", () => {
   });
 
   it("ignores content, dispatch and view creation after destroy", () => {
-    const editor = createEditor({ extensions: withCommand(() => true) });
+    const editor = new EditorCore({ extensions: withCommand(() => true) });
 
     editor.destroy();
     editor.setContent({
@@ -209,20 +209,21 @@ describe("createEditor", () => {
   });
 
   it("rejects non-string markdown content when a codec is present", () => {
-    const codec: MarkdownCodec = {
+    const codec: ContentCodec = {
       parse: () => {
         throw new Error("should not parse");
       },
       serialize: () => "",
     };
 
-    expect(() =>
-      createEditor({
-        extensions: withCommand(() => true),
-        content: {},
-        contentType: "markdown",
-        markdown: codec,
-      }),
+    expect(
+      () =>
+        new EditorCore({
+          extensions: withCommand(() => true),
+          content: {},
+          contentType: "markdown",
+          markdown: codec,
+        }),
     ).toThrow(/string content/);
   });
 
@@ -235,7 +236,7 @@ describe("createEditor", () => {
         return `<p>${doc.textContent}</p>`;
       },
     };
-    const editor = createEditor({
+    const editor = new EditorCore({
       extensions: withCommand(() => true),
       content: "html",
       contentType: "html",
@@ -248,27 +249,28 @@ describe("createEditor", () => {
   });
 
   it("requires a codec for HTML content and getHTML", () => {
-    expect(() =>
-      createEditor({
-        extensions: withCommand(() => true),
-        content: "<p>x</p>",
-        contentType: "html",
-      }),
+    expect(
+      () =>
+        new EditorCore({
+          extensions: withCommand(() => true),
+          content: "<p>x</p>",
+          contentType: "html",
+        }),
     ).toThrow(/html codec/);
 
-    const editor = createEditor({ extensions: withCommand(() => true) });
+    const editor = new EditorCore({ extensions: withCommand(() => true) });
     expect(() => editor.getHTML()).toThrow(/html codec/);
   });
 
   it("serializes the document to JSON", () => {
-    const editor = createEditor({ extensions: withCommand(() => true) });
+    const editor = new EditorCore({ extensions: withCommand(() => true) });
 
     expect(editor.getJSON()).toBe(JSON.stringify(editor.state.doc.toJSON()));
   });
 
   it("accepts a ProseMirror node as content", () => {
-    const source = createEditor({ extensions: withCommand(() => true) });
-    const editor = createEditor({
+    const source = new EditorCore({ extensions: withCommand(() => true) });
+    const editor = new EditorCore({
       extensions: withCommand(() => true),
       content: source.state.doc,
     });
@@ -290,7 +292,7 @@ describe("createEditor", () => {
       },
     };
 
-    createEditor({
+    new EditorCore({
       extensions: [...withCommand(() => true), extension],
     });
 
@@ -315,7 +317,7 @@ describe("createEditor", () => {
       },
     };
 
-    createEditor({
+    new EditorCore({
       extensions: [...withCommand(() => true), extension],
     });
 

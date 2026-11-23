@@ -97,13 +97,12 @@ view.
 Build a codec with only the extensions under test, then assert the strategy:
 
 ```ts
-import { createMarkdownCodec } from "@rk/editor";
+import { ExtensionManager, MarkdownCodec } from "@rk/editor";
 import { Document, Paragraph, Text } from "@rk/editor/extensions";
-import { createExtensionManager } from "@rk/editor";
 
 const extensions = [Document(), Text(), Paragraph()];
-const manager = createExtensionManager(extensions);
-const codec = createMarkdownCodec({ extensions });
+const manager = new ExtensionManager(extensions);
+const codec = new MarkdownCodec({ extensions });
 
 expect(() => codec.parse("> quote", manager.schema)).toThrow(
   /No markdown handler for mdast node "blockquote"/,
@@ -174,11 +173,11 @@ The HTML codec needs a DOM only when parsing or serializing. Inject a
 
 ```ts
 import { parseHTML } from "linkedom";
-import { createHtmlCodec } from "@rk/editor/html";
+import { HtmlCodec } from "@rk/editor/html";
 import { starterKit } from "@rk/editor/extensions";
 
 const { document } = parseHTML("<!doctype html><html><body></body></html>");
-const codec = createHtmlCodec({ extensions: starterKit(), document });
+const codec = new HtmlCodec({ extensions: starterKit(), document });
 ```
 
 HTML suites cover round trips, XSS, messy pasted markup, cross-format

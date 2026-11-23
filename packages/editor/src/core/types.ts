@@ -196,9 +196,6 @@ export interface ContentCodec {
   serialize(doc: PmNode): string;
 }
 
-/** Markdown codec, kept as an alias for the shared codec contract. */
-export type MarkdownCodec = ContentCodec;
-
 /** Attribute allowlist entry used by the HTML sanitizer. */
 export type HtmlAttributeDefinition = string | readonly [string, ...string[]];
 

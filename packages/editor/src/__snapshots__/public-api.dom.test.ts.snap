@@ -4,10 +4,10 @@ exports[`public API > snapshots the . entry 1`] = `
 [
   "CONTROLLED_UPDATE_META",
   "EDITOR_NAME",
+  "Editor",
+  "ExtensionManager",
   "MARK_ORDER",
-  "createEditor",
-  "createExtensionManager",
-  "createMarkdownCodec",
+  "MarkdownCodec",
   "defineExtension",
   "inlineFromMdast",
   "inlineToMdast",
@@ -37,8 +37,8 @@ exports[`public API > snapshots the ./extensions entry 1`] = `
 
 exports[`public API > snapshots the ./html entry 1`] = `
 [
+  "HtmlCodec",
   "buildSanitizeSchema",
-  "createHtmlCodec",
 ]
 `;
 

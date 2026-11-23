@@ -2,8 +2,8 @@ import { TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { createEditor, type Editor } from "../../core/create-editor";
-import { createExtensionManager } from "../../core/extension-manager";
+import { EditorCore } from "../../core/editor";
+import { ExtensionManager } from "../../core/extension-manager";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
 import { Text } from "../text/text";
@@ -11,16 +11,16 @@ import { Selection } from "./selection";
 
 const extensions = () => [Document(), Text(), Paragraph(), Selection()];
 
-const editors: Editor[] = [];
+const editors: EditorCore[] = [];
 
 const mount = (): EditorView => {
-  const schema = createExtensionManager(extensions()).schema;
+  const schema = new ExtensionManager(extensions()).schema;
   const doc = schema.node("doc", null, [schema.node("paragraph", null, schema.text("alpha beta"))]);
   const element = document.createElement("div");
 
   document.body.append(element);
 
-  const editor = createEditor({ extensions: extensions(), content: doc, element });
+  const editor = new EditorCore({ extensions: extensions(), content: doc, element });
 
   editors.push(editor);
 

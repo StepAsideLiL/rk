@@ -1,2 +1,2 @@
-export { createHtmlCodec, type CreateHtmlCodecOptions, type HtmlCodecConfig } from "./codec";
+export { HtmlCodec, type HtmlCodecConfig, type HtmlCodecOptions } from "./codec";
 export { buildSanitizeSchema, type UnknownElementStrategy } from "./sanitize";

@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 
-import type { Editor } from "../core/create-editor";
+import type { Editor } from "../editor";
 import { EditorContext } from "./editor-provider";
 
 /** Read the editor from the nearest {@link EditorProvider}. */

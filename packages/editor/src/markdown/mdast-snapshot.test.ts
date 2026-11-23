@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
-import { createMarkdownCodec } from "./codec";
+import { ExtensionManager } from "../core/extension-manager";
+import { MarkdownCodec } from "./codec";
 import { toMdastRoot } from "./convert";
 import { testExtensions } from "./fixtures.test-utils";
 
-const manager = createExtensionManager(testExtensions);
+const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;
-const codec = createMarkdownCodec({ extensions: testExtensions });
+const codec = new MarkdownCodec({ extensions: testExtensions });
 
 describe("mdast snapshots", () => {
   it.each(["**a *b* c**", "**a***b*", "**a `b` c**"])(

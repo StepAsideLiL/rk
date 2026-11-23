@@ -1,7 +1,7 @@
 import { DOMSerializer, DOMParser as PmDOMParser } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../../core/extension-manager";
+import { ExtensionManager } from "../../core/extension-manager";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
 import { Text } from "../text/text";
@@ -9,7 +9,7 @@ import { Italic } from "./italic";
 
 const extensions = () => [Document(), Text(), Paragraph(), Italic()];
 
-const createSchema = () => createExtensionManager(extensions()).schema;
+const createSchema = () => new ExtensionManager(extensions()).schema;
 
 describe("Italic DOM", () => {
   it("serializes emphasis and parses it back", () => {

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
+import { ExtensionManager } from "../core/extension-manager";
 import { starterKit } from "../extensions/index";
-import { createEditor } from "../index";
-import { createHtmlCodec } from "./codec";
+import { Editor } from "../index";
+import { HtmlCodec } from "./codec";
 import { document, extensions } from "./fixtures.test-utils";
 
 const jsonDoc = {
@@ -26,7 +26,7 @@ describe("editor HTML integration", () => {
   });
 
   it("creates an editor from HTML and serializes it back", () => {
-    const editor = createEditor({
+    const editor = new Editor({
       extensions,
       content: "<h1>Hi</h1>",
       contentType: "html",
@@ -37,14 +37,14 @@ describe("editor HTML integration", () => {
     editor.destroy();
   });
 
-  it("uses the same codec as createHtmlCodec", () => {
-    const editor = createEditor({
+  it("uses the same codec as HtmlCodec", () => {
+    const editor = new Editor({
       extensions,
       content: "<p><strong>same</strong></p>",
       contentType: "html",
     });
-    const manager = createExtensionManager(extensions);
-    const codec = createHtmlCodec({
+    const manager = new ExtensionManager(extensions);
+    const codec = new HtmlCodec({
       extensions,
       document,
       schema: manager.schema,
@@ -55,7 +55,7 @@ describe("editor HTML integration", () => {
   });
 
   it("sets content as markdown, HTML and JSON", () => {
-    const editor = createEditor({
+    const editor = new Editor({
       extensions,
       content: "# start",
       contentType: "markdown",
@@ -74,7 +74,7 @@ describe("editor HTML integration", () => {
   });
 
   it("converts markdown to HTML and HTML to markdown", () => {
-    const fromMarkdown = createEditor({
+    const fromMarkdown = new Editor({
       extensions,
       content: "# Hi **bold**",
       contentType: "markdown",
@@ -83,7 +83,7 @@ describe("editor HTML integration", () => {
     expect(fromMarkdown.getHTML()).toBe("<h1>Hi <strong>bold</strong></h1>");
     fromMarkdown.destroy();
 
-    const fromHtml = createEditor({
+    const fromHtml = new Editor({
       extensions,
       content: "<p><strong>a</strong></p>",
       contentType: "html",
@@ -96,7 +96,7 @@ describe("editor HTML integration", () => {
   it("reports a missing document when HTML is used without one", () => {
     vi.unstubAllGlobals();
 
-    const editor = createEditor({
+    const editor = new Editor({
       extensions: starterKit(),
       content: "# x",
       contentType: "markdown",

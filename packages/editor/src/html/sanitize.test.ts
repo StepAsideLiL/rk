@@ -6,11 +6,11 @@ import rehypeStringify from "rehype-stringify";
 import { unified } from "unified";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
+import { ExtensionManager } from "../core/extension-manager";
 import { defineExtension, type Extension } from "../core/types";
 import { Document, Paragraph, Text } from "../extensions/index";
 import { starterKit } from "../extensions/index";
-import { createHtmlCodec } from "./codec";
+import { HtmlCodec } from "./codec";
 import { document, extensions, roundTripHtml } from "./fixtures.test-utils";
 import { buildSanitizeSchema } from "./sanitize";
 
@@ -121,8 +121,8 @@ describe("HTML sanitizer", () => {
   });
 
   it("drops unknown elements and their content in drop mode", () => {
-    const manager = createExtensionManager(extensions);
-    const dropCodec = createHtmlCodec({
+    const manager = new ExtensionManager(extensions);
+    const dropCodec = new HtmlCodec({
       extensions,
       document,
       unknownElement: "drop",
@@ -139,7 +139,7 @@ describe("HTML sanitizer", () => {
 });
 
 describe("HTML allowlists", () => {
-  const manager = createExtensionManager(starterKit());
+  const manager = new ExtensionManager(starterKit());
   const sanitizer = unified()
     .use(rehypeParse, { fragment: true })
     .use(rehypeSanitize, buildSanitizeSchema(starterKit()))

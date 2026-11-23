@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defineExtension, type Extension } from "./index";
+import { defineExtension, type Extension } from "./types";
 
 interface TestOptions {
   label: string;

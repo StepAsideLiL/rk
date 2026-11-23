@@ -2,13 +2,13 @@ import fc from "fast-check";
 import type { Mark } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
-import { createMarkdownCodec } from "../markdown/index";
+import { ExtensionManager } from "../core/extension-manager";
+import { MarkdownCodec } from "../markdown/codec";
 import { starterKit } from "./index";
 
 const extensions = starterKit();
-const manager = createExtensionManager(extensions);
-const codec = createMarkdownCodec({ extensions });
+const manager = new ExtensionManager(extensions);
+const codec = new MarkdownCodec({ extensions });
 const schema = manager.schema;
 
 const strong = schema.marks.strong;

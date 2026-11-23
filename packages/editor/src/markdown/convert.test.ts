@@ -2,12 +2,12 @@ import type { Content, PhrasingContent, Root } from "mdast";
 import { Schema } from "prosemirror-model";
 import { describe, expect, it } from "vitest";
 
-import { createExtensionManager } from "../core/extension-manager";
+import { ExtensionManager } from "../core/extension-manager";
 import type { CollectedMarkdown } from "../core/extension-manager";
 import { fromMdastRoot, toMdastRoot } from "./convert";
 import { testExtensions } from "./fixtures.test-utils";
 
-const manager = createExtensionManager(testExtensions);
+const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;
 const paragraphHandler = manager.markdown.fromMdast.paragraph;
 

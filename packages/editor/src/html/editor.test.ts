@@ -4,7 +4,7 @@ import { ExtensionManager } from "../core/extension-manager";
 import { starterKit } from "../extensions/index";
 import { Editor } from "../index";
 import { HtmlCodec } from "./codec";
-import { document, extensions } from "./fixtures.test-utils";
+import { document, extensions } from "./test/fixtures";
 
 const jsonDoc = {
   type: "doc",

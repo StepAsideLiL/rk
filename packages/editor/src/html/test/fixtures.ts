@@ -1,9 +1,9 @@
 import { parseHTML } from "linkedom";
 
-import type { Extension } from "../core/types";
-import { ExtensionManager } from "../core/extension-manager";
-import { starterKit } from "../extensions/index";
-import { HtmlCodec } from "./codec";
+import type { Extension } from "../../core/types";
+import { ExtensionManager } from "../../core/extension-manager";
+import { starterKit } from "../../extensions/index";
+import { HtmlCodec } from "../codec";
 
 /** Shared extensions for HTML tests. */
 export const extensions = starterKit();

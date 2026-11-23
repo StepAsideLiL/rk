@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ExtensionManager } from "../core/extension-manager";
 import { HtmlCodec } from "./codec";
-import { codec, extensions, roundTripHtml } from "./fixtures.test-utils";
+import { codec, extensions, roundTripHtml } from "./test/fixtures";
 
 const manager = new ExtensionManager(extensions);
 

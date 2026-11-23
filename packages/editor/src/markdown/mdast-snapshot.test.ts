@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ExtensionManager } from "../core/extension-manager";
 import { MarkdownCodec } from "./codec";
 import { toMdastRoot } from "./convert";
-import { testExtensions } from "./fixtures.test-utils";
+import { testExtensions } from "./test/fixtures";
 
 const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;

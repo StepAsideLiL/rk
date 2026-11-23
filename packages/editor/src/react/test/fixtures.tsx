@@ -1,4 +1,4 @@
-import { starterKit } from "../extensions/index";
+import { starterKit } from "../../extensions/index";
 
 /** Shared extensions for React tests. */
 export const extensions = starterKit();

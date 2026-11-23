@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { ExtensionManager } from "../core/extension-manager";
 import type { CollectedMarkdown } from "../core/extension-manager";
 import { fromMdastRoot, toMdastRoot } from "./convert";
-import { testExtensions } from "./fixtures.test-utils";
+import { testExtensions } from "./test/fixtures";
 
 const manager = new ExtensionManager(testExtensions);
 const schema = manager.schema;

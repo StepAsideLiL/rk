@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 
 import { EditorContent } from "./editor-content";
 import { EditorProvider } from "./editor-provider";
-import { extensions } from "./fixtures.test-utils";
+import { extensions } from "./test/fixtures";
 import { shallowEqual } from "./shallow-equal";
 import { useEditor } from "./use-editor";
 import { useEditorState } from "./use-editor-state";

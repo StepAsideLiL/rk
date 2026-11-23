@@ -1,33 +1,9 @@
-// @vitest-environment jsdom
-
 import { describe, expect, it, vi } from "vitest";
 import { Plugin } from "prosemirror-state";
 
 import { EditorCore } from "./editor";
-import type { Command, Extension } from "./types";
-
-const documentExtension: Extension<unknown> = {
-  name: "document",
-  nodes: {
-    doc: { content: "block+" },
-    text: { group: "inline" },
-  },
-};
-
-const paragraphExtension: Extension<unknown> = {
-  name: "paragraph",
-  priority: 0,
-  nodes: {
-    paragraph: { group: "block", content: "inline*", toDOM: () => ["p", 0] },
-  },
-};
-
-const withCommand = (command: Command, extraPlugins: Plugin[] = []): Extension<unknown>[] => [
-  documentExtension,
-  paragraphExtension,
-  { name: "command", commands: () => ({ testCommand: command }) },
-  { name: "extra", plugins: () => extraPlugins },
-];
+import { withCommand } from "./test/fixtures";
+import type { Command } from "./types";
 
 const insertText: Command = (state, dispatch) => {
   if (!dispatch) {

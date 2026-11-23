@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from "vitest";
 
 import { EditorContent } from "./editor-content";
 import { EditorProvider } from "./editor-provider";
-import { extensions } from "./fixtures.test-utils";
+import { extensions } from "./test/fixtures";
 
 afterEach(() => {
   vi.restoreAllMocks();

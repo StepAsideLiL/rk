@@ -21,6 +21,7 @@ export default defineConfig({
         "**/*.test-d.ts",
         "**/*.test-utils.*",
         "**/*.bench.ts",
+        "**/test/**",
         "**/setup-dom.ts",
       ],
       bundleTypes: false,

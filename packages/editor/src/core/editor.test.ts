@@ -3,36 +3,8 @@ import { Plugin, PluginKey } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
 import { CONTROLLED_UPDATE_META, EditorCore } from "./editor";
+import { withCommand } from "./test/fixtures";
 import type { Command, ContentCodec, Extension } from "./types";
-
-declare module "./types" {
-  interface Commands {
-    testCommand: Command;
-  }
-}
-
-const documentExtension: Extension<unknown> = {
-  name: "document",
-  nodes: {
-    doc: { content: "block+" },
-    text: { group: "inline" },
-  },
-};
-
-const paragraphExtension: Extension<unknown> = {
-  name: "paragraph",
-  priority: 0,
-  nodes: {
-    paragraph: { group: "block", content: "inline*", toDOM: () => ["p", 0] },
-  },
-};
-
-const withCommand = (command: Command, extraPlugins: Plugin[] = []): Extension<unknown>[] => [
-  documentExtension,
-  paragraphExtension,
-  { name: "command", commands: () => ({ testCommand: command }) },
-  { name: "extra", plugins: () => extraPlugins },
-];
 
 describe("EditorCore", () => {
   it("runs commands without a view and never dispatches from can", () => {
@@ -325,5 +297,9 @@ describe("EditorCore", () => {
     expect(stateError).toMatchObject({
       message: "Editor state is not available during extension setup.",
     });
+  });
+
+  it("runs without a DOM", () => {
+    expect("window" in globalThis).toBe(false);
   });
 });

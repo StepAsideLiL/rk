@@ -1,6 +1,6 @@
 import type { BlockContent, ListItem, PhrasingContent } from "mdast";
 
-import type { Extension } from "../core/types";
+import type { Extension } from "../../core/types";
 
 /** Document node and its markdown root/doc handlers. */
 export const documentExtension: Extension<unknown> = {

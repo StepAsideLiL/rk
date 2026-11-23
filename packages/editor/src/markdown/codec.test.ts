@@ -4,7 +4,7 @@ import type { Plugin as UnifiedPlugin } from "unified";
 
 import { ExtensionManager } from "../core/extension-manager";
 import { MarkdownCodec, defaultUnknownNodeStrategy } from "./codec";
-import { testExtensions } from "./fixtures.test-utils";
+import { testExtensions } from "./test/fixtures";
 
 const remarkPlugin = (() => undefined) as unknown as UnifiedPlugin;
 const pluginExtension: Extension<unknown> = {

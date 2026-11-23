@@ -4,7 +4,7 @@ import { expect, it, vi } from "vitest";
 
 import { EditorContent } from "./editor-content";
 import { EditorProvider } from "./editor-provider";
-import { extensions, jsonDoc } from "./fixtures.test-utils";
+import { extensions, jsonDoc } from "./test/fixtures";
 import { useEditor } from "./use-editor";
 import { useEditorState } from "./use-editor-state";
 

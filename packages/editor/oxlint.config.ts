@@ -161,6 +161,7 @@ export default defineConfig({
         "src/react/**/*.test-d.ts",
         "src/html/**/*.test.ts",
         "src/html/**/*.test-utils.ts",
+        "src/**/test/**",
       ],
       rules: {
         // Tests may assemble the public entry points to exercise integration.
@@ -168,7 +169,7 @@ export default defineConfig({
       },
     },
     {
-      files: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.test-d.ts"],
+      files: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.test-d.ts", "src/**/test/**"],
       rules: {
         // Tests may exercise DOM-facing behavior (for example plugin view
         // lifecycles) even when the source folder itself must stay DOM-free.

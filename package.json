@@ -5,10 +5,12 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint lint:root",
+    "lint:root": "oxlint --fix && oxfmt --write && oxlint && oxfmt --check",
     "test": "turbo run test",
     "check": "pnpm turbo run lint typecheck test build",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "turbo run typecheck typecheck:root",
+    "typecheck:root": "tsc --noEmit",
     "playground": "pnpm --filter @rk/playground dev"
   },
   "devDependencies": {

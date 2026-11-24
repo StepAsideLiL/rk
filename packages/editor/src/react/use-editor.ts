@@ -2,10 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { ContentType } from "../core/types";
-import { CONTROLLED_UPDATE_META, Editor, type EditorOptions } from "../editor";
+import {
+  CONTROLLED_UPDATE_META,
+  Editor,
+  type EditorContentType,
+  type EditorOptions,
+} from "../editor";
 
-export type EditorOutputFormat = ContentType;
+export type EditorOutputFormat = EditorContentType;
 
 export interface UseEditorOptions extends Omit<EditorOptions, "element"> {
   readonly outputFormat?: EditorOutputFormat;

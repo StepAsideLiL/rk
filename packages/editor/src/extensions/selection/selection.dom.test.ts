@@ -2,7 +2,7 @@ import { TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { EditorCore } from "../../core/editor";
+import { Editor } from "../../editor";
 import { ExtensionManager } from "../../core/extension-manager";
 import { Document } from "../document/document";
 import { Paragraph } from "../paragraph/paragraph";
@@ -11,7 +11,7 @@ import { Selection } from "./selection";
 
 const extensions = () => [Document(), Text(), Paragraph(), Selection()];
 
-const editors: EditorCore[] = [];
+const editors: Editor[] = [];
 
 const mount = (): EditorView => {
   const schema = new ExtensionManager(extensions()).schema;
@@ -20,7 +20,7 @@ const mount = (): EditorView => {
 
   document.body.append(element);
 
-  const editor = new EditorCore({ extensions: extensions(), content: doc, element });
+  const editor = new Editor({ extensions: extensions(), content: doc, element });
 
   editors.push(editor);
 

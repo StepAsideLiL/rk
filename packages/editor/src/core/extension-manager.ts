@@ -2,7 +2,7 @@ import { history } from "prosemirror-history";
 import type { InputRule } from "prosemirror-inputrules";
 import { inputRules } from "prosemirror-inputrules";
 import { keymap } from "prosemirror-keymap";
-import type { MarkSpec, NodeSpec } from "prosemirror-model";
+import type { MarkSpec, NodeSpec, SchemaSpec } from "prosemirror-model";
 import { Schema } from "prosemirror-model";
 import type { Plugin } from "prosemirror-state";
 import type { NodeViewConstructor } from "prosemirror-view";
@@ -21,6 +21,18 @@ import type {
 
 /** Priority used when an extension does not specify one. */
 const DEFAULT_PRIORITY = 100;
+
+/** Options that control how extensions are assembled. */
+export interface ExtensionManagerOptions {
+  /** Complete schema spec. Every node and mark must have a matching extension. */
+  readonly schemaSpec?: SchemaSpec;
+}
+
+/** Options for the generated plugin list. */
+export interface CreatePluginsOptions {
+  /** Whether input rules run, or the extensions whose rules should run. */
+  readonly inputRules?: boolean | readonly (Extension<unknown> | string)[];
+}
 
 /**
  * Markdown contributions collected from every extension.
@@ -70,9 +82,11 @@ export class ExtensionManager {
    * Throws when two extensions share a name, when a `requires` entry is missing
    * or when no `doc` node was contributed.
    */
-  constructor(extensions: readonly Extension<unknown>[]) {
+  constructor(extensions: readonly Extension<unknown>[], options: ExtensionManagerOptions = {}) {
     this.extensions = orderExtensions(flattenExtensions(extensions));
-    this.schema = mergeSchema(this.extensions);
+    this.schema = options.schemaSpec
+      ? schemaFromSpec(options.schemaSpec, this.extensions)
+      : mergeSchema(this.extensions);
     this.markdown = collectMarkdown(this.extensions);
     this.nodeViews = collectNodeViews(this.extensions);
   }
@@ -89,8 +103,8 @@ export class ExtensionManager {
   }
 
   /** Build the ordered ProseMirror plugin list for an editor. */
-  createPlugins(context: ExtensionContext): readonly Plugin[] {
-    return createPlugins(this.extensions, context);
+  createPlugins(context: ExtensionContext, options: CreatePluginsOptions = {}): readonly Plugin[] {
+    return createPlugins(this.extensions, context, options);
   }
 }
 
@@ -210,6 +224,7 @@ function collectNodeViews(
 function createPlugins(
   extensions: readonly Extension<unknown>[],
   context: ExtensionContext,
+  options: CreatePluginsOptions,
 ): Plugin[] {
   const plugins: Plugin[] = [];
   const tiers = new Map<number, Extension<unknown>[]>();
@@ -246,10 +261,14 @@ function createPlugins(
   const rules: InputRule[] = [];
 
   for (const extension of [...extensions].reverse()) {
-    rules.push(...(extension.inputRules?.(context) ?? []));
+    if (inputRulesEnabled(extension, options.inputRules)) {
+      rules.push(...(extension.inputRules?.(context) ?? []));
+    }
   }
 
-  plugins.push(inputRules({ rules }));
+  if (options.inputRules !== false) {
+    plugins.push(inputRules({ rules }));
+  }
 
   for (const extension of extensions) {
     plugins.push(...(extension.plugins?.(context) ?? []));
@@ -263,4 +282,69 @@ function createPlugins(
 /** Priority with the default applied. */
 function priorityOf(extension: Extension<unknown>): number {
   return extension.priority ?? DEFAULT_PRIORITY;
+}
+
+/** Build a schema from an external spec and verify extension coverage. */
+function schemaFromSpec(spec: SchemaSpec, extensions: readonly Extension<unknown>[]): Schema {
+  const schema = new Schema(spec);
+  const extensionNodes = new Set<string>();
+  const extensionMarks = new Set<string>();
+
+  for (const extension of extensions) {
+    for (const name of Object.keys(extension.nodes ?? {})) {
+      extensionNodes.add(name);
+    }
+
+    for (const name of Object.keys(extension.marks ?? {})) {
+      extensionMarks.add(name);
+    }
+  }
+
+  for (const name of Object.keys(schema.nodes)) {
+    if (!extensionNodes.has(name)) {
+      throw new Error(
+        `Schema spec node "${name}" has no matching extension node. Every spec node needs an extension.`,
+      );
+    }
+  }
+
+  for (const name of Object.keys(schema.marks)) {
+    if (!extensionMarks.has(name)) {
+      throw new Error(
+        `Schema spec mark "${name}" has no matching extension mark. Every spec mark needs an extension.`,
+      );
+    }
+  }
+
+  for (const name of extensionNodes) {
+    if (!schema.nodes[name]) {
+      throw new Error(`Extension node "${name}" is missing from the schema spec.`);
+    }
+  }
+
+  for (const name of extensionMarks) {
+    if (!schema.marks[name]) {
+      throw new Error(`Extension mark "${name}" is missing from the schema spec.`);
+    }
+  }
+
+  return schema;
+}
+
+/** Whether an extension's input rules should be installed. */
+function inputRulesEnabled(
+  extension: Extension<unknown>,
+  filter: CreatePluginsOptions["inputRules"],
+): boolean {
+  if (filter === undefined || filter === true) {
+    return true;
+  }
+
+  if (filter === false) {
+    return false;
+  }
+
+  return filter.some((entry) =>
+    typeof entry === "string" ? entry === extension.name : entry === extension,
+  );
 }

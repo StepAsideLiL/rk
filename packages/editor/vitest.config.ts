@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      include: ["src/core/**/*.ts", "src/markdown/**/*.ts", "src/html/**/*.ts"],
+      include: ["src/editor.ts", "src/core/**/*.ts", "src/markdown/**/*.ts", "src/html/**/*.ts"],
       exclude: [
         "**/*.test.*",
         "**/*.test-d.ts",
@@ -22,6 +22,7 @@ export default defineConfig({
           environment: "node",
           exclude: ["**/node_modules/**", "**/dist/**", "**/*.dom.test.{ts,tsx}"],
           include: [
+            "src/editor.test.ts",
             "src/core/**/*.test.ts",
             "src/markdown/**/*.test.ts",
             "src/extensions/**/*.test.ts",

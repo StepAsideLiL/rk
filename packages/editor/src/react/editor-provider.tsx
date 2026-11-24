@@ -6,7 +6,7 @@ import {
   CONTROLLED_UPDATE_META,
   type EditorContent as EditorContentValue,
   type EditorContentType,
-} from "../core/editor";
+} from "../editor";
 import type { ContentCodec, ContentType, Extension } from "../core/types";
 import { Editor } from "../editor";
 

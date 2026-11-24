@@ -5,14 +5,15 @@ declarative extensions over ProseMirror.
 
 ## Layout
 
-| Path              | Purpose                                                              |
-| ----------------- | -------------------------------------------------------------------- |
-| `src/core/`       | Types, `ExtensionManager` and codec-injected `EditorCore`. DOM-free. |
-| `src/markdown/`   | unified pipeline and mdast <-> ProseMirror handlers.                 |
-| `src/html/`       | Sanitized rehype pipeline and HTML codec.                            |
-| `src/extensions/` | One folder per feature.                                              |
-| `src/react/`      | React provider, hooks and NodeView helper.                           |
-| `src/testing/`    | Test helpers, exported as `@rk/editor/testing`.                      |
+| Path              | Purpose                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `src/core/`       | Types, `ExtensionManager` and flattening helpers. DOM-free. |
+| `src/editor.ts`   | `Editor` class with default markdown, HTML and JSON codecs. |
+| `src/markdown/`   | unified pipeline and mdast <-> ProseMirror handlers.        |
+| `src/html/`       | Sanitized rehype pipeline and HTML codec.                   |
+| `src/extensions/` | One folder per feature.                                     |
+| `src/react/`      | React provider, hooks and NodeView helper.                  |
+| `src/testing/`    | Test helpers, exported as `@rk/editor/testing`.             |
 
 ## Scripts
 
@@ -27,6 +28,18 @@ Consumers use `@rk/editor`, `@rk/editor/react`, `@rk/editor/extensions`,
 `@rk/editor/html` and `@rk/editor/testing`. The `Editor` class wires the markdown,
 HTML and JSON codecs by default. The interactive demo runs in the workspace
 playground at `/editor` (`pnpm playground` from the repo root).
+
+## Editor API
+
+`Editor` accepts `element`, `editable`, `textDirection`, `autofocus`,
+`editorProps`, `coreExtensionOptions.tabindex`, `enableInputRules` and
+`schemaSpec` alongside `extensions` and `content`.
+
+Runtime helpers include `setEditable`, `setOptions`, `mount`, `unmount`,
+`registerPlugin`, `unregisterPlugin`, `chain`, `getText`, `getAttributes`,
+`isActive`, `isEmpty`, `isFocused` and `isDestroyed`. Extensions and
+`schemaSpec` are read at construction; `setOptions` updates runtime options
+such as `editable`, `editorProps`, `textDirection` and `content`.
 
 ## Inactive selection
 

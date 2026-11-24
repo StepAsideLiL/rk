@@ -191,5 +191,5 @@ when an extension forgets `html.sanitize`.
 - HTML codec tests live in `src/html/*.test.ts` and use `linkedom`.
 - DOM tests live next to the code: `heading/heading.dom.test.ts`.
 - Benchmarks use `*.bench.ts` and run with `pnpm bench`.
-- Coverage runs with `pnpm coverage`; it covers `src/core`, `src/markdown` and
-  `src/html`.
+- Coverage runs with `pnpm coverage`; it covers `src/editor.ts`, `src/core`,
+  `src/markdown` and `src/html`.

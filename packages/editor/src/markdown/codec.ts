@@ -58,33 +58,33 @@ export interface MarkdownCodecOptions extends MarkdownCodecConfig {
  * for every call, including the remark plugins contributed by extensions.
  */
 export class MarkdownCodec implements ContentCodec {
-  readonly #manager: ExtensionManager;
-  readonly #strategy: UnknownNodeStrategy;
-  readonly #parseProcessor: ReturnType<typeof createParseProcessor>;
-  readonly #stringifyProcessor: ReturnType<typeof createStringifyProcessor>;
+  private readonly manager: ExtensionManager;
+  private readonly strategy: UnknownNodeStrategy;
+  private readonly parseProcessor: ReturnType<typeof createParseProcessor>;
+  private readonly stringifyProcessor: ReturnType<typeof createStringifyProcessor>;
 
   constructor(options: MarkdownCodecOptions) {
-    this.#manager = new ExtensionManager(options.extensions);
-    this.#strategy = options.unknownNode ?? DEFAULT_UNKNOWN;
-    this.#parseProcessor = createParseProcessor(this.#manager.markdown.remarkPlugins);
-    this.#stringifyProcessor = createStringifyProcessor(
-      this.#manager.markdown.remarkPlugins,
+    this.manager = new ExtensionManager(options.extensions);
+    this.strategy = options.unknownNode ?? DEFAULT_UNKNOWN;
+    this.parseProcessor = createParseProcessor(this.manager.markdown.remarkPlugins);
+    this.stringifyProcessor = createStringifyProcessor(
+      this.manager.markdown.remarkPlugins,
       options.stringify,
     );
   }
 
   parse(markdown: string, schema: Schema): PmNode {
-    const tree = this.#parseProcessor.parse(markdown) as Root;
-    const transformed = this.#parseProcessor.runSync(tree) as Root;
+    const tree = this.parseProcessor.parse(markdown) as Root;
+    const transformed = this.parseProcessor.runSync(tree) as Root;
 
-    return fromMdastRoot(transformed, schema, this.#manager.markdown, this.#strategy);
+    return fromMdastRoot(transformed, schema, this.manager.markdown, this.strategy);
   }
 
   serialize(doc: PmNode): string {
-    const root = toMdastRoot(doc, this.#manager.markdown, this.#strategy);
-    const transformed = this.#stringifyProcessor.runSync(root) as Root;
+    const root = toMdastRoot(doc, this.manager.markdown, this.strategy);
+    const transformed = this.stringifyProcessor.runSync(root) as Root;
 
-    return this.#stringifyProcessor.stringify(transformed).replace(/\n$/, "");
+    return this.stringifyProcessor.stringify(transformed).replace(/\n$/, "");
   }
 }
 

@@ -17,17 +17,16 @@ each extension's `parseDOM`/`toDOM` specs.
 
 ## Layout
 
-- `src/core` — types, `defineExtension`, `ExtensionManager`, the codec-injected
-  editor class and content codec contracts. No DOM, no imports from sibling
-  folders.
+- `src/core` — types, `defineExtension`, `ExtensionManager`, flattening helpers
+  and content codec contracts. No DOM, no imports from sibling folders.
 - `src/markdown` — unified pipeline, mdast ↔ ProseMirror conversion, shared mark
   helpers. No DOM.
 - `src/html` — sanitized rehype pipeline, DOM parsing/serialization and
   sanitizer schema merging. No imports outside core.
 - `src/extensions` — one folder per feature, plus `shared/` helpers, the
   `StarterKit()` default bundle and the `PlaygroundKit()` playground bundle.
-- `src/editor.ts` — public `Editor` class that assembles the markdown, HTML and
-  JSON codecs.
+- `src/editor.ts` — the `Editor` class with default markdown, HTML and JSON
+  codecs.
 - `src/react` — provider, hooks, `EditorContent`, `createReactNodeView`.
 - `src/testing` — `createTestEditor`, `roundTrip`, `docOf`, `textOf`, `press`,
   `typeText`.
@@ -70,7 +69,8 @@ each extension's `parseDOM`/`toDOM` specs.
 - `pnpm build` emits ESM plus per-entry `.d.ts`; dependencies stay external.
 - `pnpm test` runs the node and jsdom Vitest projects. HTML tests inject a
   `linkedom` document in the node project.
-- `pnpm coverage` covers `src/core`, `src/markdown` and `src/html` with v8.
+- `pnpm coverage` covers `src/editor.ts`, `src/core`, `src/markdown` and
+  `src/html` with v8.
 - `pnpm smoke` imports every built subpath from `dist`, including
   `@rk/editor/html`, and round-trips markdown.
 - `pnpm pack --dry-run` includes only `dist/**`, `package.json` and `README.md`.

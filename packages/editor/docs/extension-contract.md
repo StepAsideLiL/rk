@@ -225,8 +225,10 @@ new MarkdownCodec({
 
 ## Wiring
 
-Core never imports extensions, markdown or React. Applications assemble the
-codec and editor explicitly:
+The `Editor` class assembles the markdown, HTML and JSON codecs from the
+extensions by default. Core stays codec-free; override individual codecs through
+`codecs`, or replace only markdown with the legacy `markdown` option. React uses
+the same defaults through `<EditorProvider extensions />`.
 
 ```ts
 const extensions = [StarterKit()];
@@ -244,19 +246,16 @@ editor.getHTML();
 editor.getJSON();
 ```
 
-The public `Editor` class assembles the markdown, HTML and JSON codecs.
-Pass `codecs` to override one, or the legacy `markdown` option to replace only
-markdown. React uses the same defaults through `<EditorProvider extensions />`.
-
 ## Package boundaries
 
-| Folder           | May import from                       |
-| ---------------- | ------------------------------------- |
-| `src/core`       | external packages only                |
-| `src/markdown`   | `src/core`                            |
-| `src/html`       | `src/core`                            |
-| `src/react`      | `src/core`, the public `Editor` class |
-| `src/extensions` | `src/core`, shared extension helpers  |
+| Folder           | May import from                        |
+| ---------------- | -------------------------------------- |
+| `src/core`       | external packages only                 |
+| `src/markdown`   | `src/core`                             |
+| `src/html`       | `src/core`                             |
+| `src/editor.ts`  | `src/core`, `src/markdown`, `src/html` |
+| `src/react`      | `src/editor.ts`                        |
+| `src/extensions` | `src/core`, shared extension helpers   |
 
 Tests may import their subject and testing helpers. oxlint enforces
 `no-restricted-imports`; violations fail `pnpm lint`.

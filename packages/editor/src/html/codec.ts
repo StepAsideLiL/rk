@@ -36,61 +36,61 @@ export interface HtmlCodecOptions extends HtmlCodecConfig {
  * and is sanitized again as defense in depth.
  */
 export class HtmlCodec implements ContentCodec {
-  readonly #document: Document | undefined;
-  readonly #sanitizeSchema: SanitizeSchema;
-  readonly #processor: ReturnType<typeof createSanitizeProcessor>;
-  readonly #parsers = new Map<Schema, PmDOMParser>();
-  readonly #serializers = new Map<Schema, DOMSerializer>();
+  private readonly document: Document | undefined;
+  private readonly sanitizeSchema: SanitizeSchema;
+  private readonly processor: ReturnType<typeof createSanitizeProcessor>;
+  private readonly parsers = new Map<Schema, PmDOMParser>();
+  private readonly serializers = new Map<Schema, DOMSerializer>();
 
   constructor(options: HtmlCodecOptions) {
     const schema = options.schema ?? new ExtensionManager(options.extensions).schema;
 
-    this.#document = options.document;
-    this.#sanitizeSchema = buildSanitizeSchema(options.extensions);
-    this.#processor = createSanitizeProcessor(this.#sanitizeSchema, options.unknownElement);
-    this.#parsers.set(schema, PmDOMParser.fromSchema(schema));
-    this.#serializers.set(schema, DOMSerializer.fromSchema(schema));
+    this.document = options.document;
+    this.sanitizeSchema = buildSanitizeSchema(options.extensions);
+    this.processor = createSanitizeProcessor(this.sanitizeSchema, options.unknownElement);
+    this.parsers.set(schema, PmDOMParser.fromSchema(schema));
+    this.serializers.set(schema, DOMSerializer.fromSchema(schema));
   }
 
   parse(html: string, targetSchema: Schema): PmNode {
-    const windowDocument = resolveDocument(this.#document);
+    const windowDocument = resolveDocument(this.document);
     const container = windowDocument.createElement("div");
 
     // The string is sanitized before it reaches `innerHTML`.
-    container.innerHTML = sanitizeHtml(this.#processor, html);
+    container.innerHTML = sanitizeHtml(this.processor, html);
 
-    return this.#parserFor(targetSchema).parse(container);
+    return this.parserFor(targetSchema).parse(container);
   }
 
   serialize(doc: PmNode): string {
-    const windowDocument = resolveDocument(this.#document);
+    const windowDocument = resolveDocument(this.document);
     const container = windowDocument.createElement("div");
-    const fragment = this.#serializerFor(doc.type.schema).serializeFragment(doc.content, {
+    const fragment = this.serializerFor(doc.type.schema).serializeFragment(doc.content, {
       document: windowDocument,
     });
 
     container.append(fragment);
 
-    return sanitizeHtml(this.#processor, container.innerHTML);
+    return sanitizeHtml(this.processor, container.innerHTML);
   }
 
-  #parserFor(targetSchema: Schema): PmDOMParser {
-    let parser = this.#parsers.get(targetSchema);
+  private parserFor(targetSchema: Schema): PmDOMParser {
+    let parser = this.parsers.get(targetSchema);
 
     if (!parser) {
       parser = PmDOMParser.fromSchema(targetSchema);
-      this.#parsers.set(targetSchema, parser);
+      this.parsers.set(targetSchema, parser);
     }
 
     return parser;
   }
 
-  #serializerFor(targetSchema: Schema): DOMSerializer {
-    let serializer = this.#serializers.get(targetSchema);
+  private serializerFor(targetSchema: Schema): DOMSerializer {
+    let serializer = this.serializers.get(targetSchema);
 
     if (!serializer) {
       serializer = DOMSerializer.fromSchema(targetSchema);
-      this.#serializers.set(targetSchema, serializer);
+      this.serializers.set(targetSchema, serializer);
     }
 
     return serializer;

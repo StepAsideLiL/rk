@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { InputRule } from "prosemirror-inputrules";
 import type { Schema } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
@@ -225,6 +226,141 @@ describe("ExtensionManager", () => {
     expect(() => new ExtensionManager([bundle])).toThrow('Extension "bold" requires "italic"');
   });
 
+  it("builds the schema from a provided spec", () => {
+    const manager = new ExtensionManager([documentExtension(), paragraphExtension()], {
+      schemaSpec: {
+        nodes: {
+          doc: { content: "block+" },
+          paragraph: { group: "block", content: "inline*", toDOM: () => ["p", 0] },
+          text: { group: "inline" },
+        },
+      },
+    });
+
+    expect(manager.schema.nodes.doc).toBeDefined();
+    expect(manager.schema.nodes.paragraph).toBeDefined();
+    expect(manager.schema.nodes.text).toBeDefined();
+  });
+
+  it("builds the schema from a spec with marks", () => {
+    const strong = extension("strong", {
+      marks: { strong: { toDOM: () => ["strong", 0] } },
+    });
+    const manager = new ExtensionManager([documentExtension(), paragraphExtension(), strong], {
+      schemaSpec: {
+        nodes: {
+          doc: { content: "block+" },
+          paragraph: { group: "block", content: "inline*" },
+          text: { group: "inline" },
+        },
+        marks: { strong: {} },
+      },
+    });
+
+    expect(manager.schema.marks.strong).toBeDefined();
+  });
+
+  it("rejects a spec mark without a matching extension", () => {
+    expect(
+      () =>
+        new ExtensionManager([documentExtension(), paragraphExtension()], {
+          schemaSpec: {
+            nodes: {
+              doc: { content: "block+" },
+              paragraph: { group: "block", content: "inline*" },
+              text: { group: "inline" },
+            },
+            marks: { strong: {} },
+          },
+        }),
+    ).toThrow(/has no matching extension mark/);
+  });
+
+  it("rejects an extension mark missing from the spec", () => {
+    const strong = extension("strong", {
+      marks: { strong: { toDOM: () => ["strong", 0] } },
+    });
+
+    expect(
+      () =>
+        new ExtensionManager([documentExtension(), paragraphExtension(), strong], {
+          schemaSpec: {
+            nodes: {
+              doc: { content: "block+" },
+              paragraph: { group: "block", content: "inline*" },
+              text: { group: "inline" },
+            },
+          },
+        }),
+    ).toThrow(/is missing from the schema spec/);
+  });
+
+  it("rejects a spec node without a matching extension", () => {
+    expect(
+      () =>
+        new ExtensionManager([documentExtension(), paragraphExtension()], {
+          schemaSpec: {
+            nodes: {
+              doc: { content: "block+" },
+              paragraph: { group: "block", content: "inline*" },
+              text: { group: "inline" },
+              extra: { group: "block", content: "inline*" },
+            },
+          },
+        }),
+    ).toThrow(/has no matching extension node/);
+  });
+
+  it("rejects an extension node missing from the spec", () => {
+    const extra = extension("extra", {
+      nodes: { extra: { group: "block", content: "inline*" } },
+    });
+
+    expect(
+      () =>
+        new ExtensionManager([documentExtension(), paragraphExtension(), extra], {
+          schemaSpec: {
+            nodes: {
+              doc: { content: "block+" },
+              paragraph: { group: "block", content: "inline*" },
+              text: { group: "inline" },
+            },
+          },
+        }),
+    ).toThrow(/is missing from the schema spec/);
+  });
+
+  it("can disable or filter input rules", () => {
+    const rule = new InputRule(/x$/, (state, _match, start, end) => state.tr.delete(start, end));
+    const inputRules = vi.fn(() => [rule]);
+    const ruleExtension = extension("rules", { inputRules });
+    const manager = new ExtensionManager([
+      documentExtension(),
+      paragraphExtension(),
+      ruleExtension,
+    ]);
+    const context = testContext(manager.schema);
+
+    expect(manager.createPlugins(context).some(hasTextInput)).toBe(true);
+    expect(inputRules).toHaveBeenCalledTimes(1);
+
+    inputRules.mockClear();
+
+    expect(manager.createPlugins(context, { inputRules: false }).some(hasTextInput)).toBe(false);
+    expect(inputRules).not.toHaveBeenCalled();
+
+    manager.createPlugins(context, { inputRules: ["other"] });
+    expect(inputRules).not.toHaveBeenCalled();
+
+    manager.createPlugins(context, { inputRules: ["rules"] });
+    expect(inputRules).toHaveBeenCalledTimes(1);
+
+    inputRules.mockClear();
+
+    manager.createPlugins(context, { inputRules: [ruleExtension] });
+    expect(inputRules).toHaveBeenCalledTimes(1);
+  });
+
   it("collects markdown handlers and remark plugins in priority order", () => {
     const lowHandler = vi.fn(() => null);
     const highHandler = vi.fn(() => null);
@@ -249,3 +385,8 @@ describe("ExtensionManager", () => {
     expect(manager.markdown.remarkPlugins).toEqual([remarkPlugin]);
   });
 });
+
+/** Whether a plugin handles text input, which the input-rules plugin does. */
+function hasTextInput(plugin: { props: { handleTextInput?: unknown } }): boolean {
+  return typeof plugin.props.handleTextInput === "function";
+}

@@ -2,9 +2,8 @@ import type { Node as PmNode } from "prosemirror-model";
 import type { Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 
-import { EditorCore } from "../core/editor";
 import type { Extension } from "../core/types";
-import type { Editor } from "../editor";
+import { Editor } from "../editor";
 import { MarkdownCodec } from "../markdown/codec";
 
 /**
@@ -19,7 +18,7 @@ export function createTestEditor(
 ): Editor {
   const markdown = new MarkdownCodec({ extensions });
 
-  return new EditorCore({
+  return new Editor({
     extensions,
     markdown,
     ...(content === undefined ? {} : { content, contentType: "markdown" as const }),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EditorCore } from "../core/editor";
+import { Editor } from "../editor";
 import { ExtensionManager } from "../core/extension-manager";
 import { MarkdownCodec } from "./codec";
 import { testExtensions } from "./test/fixtures";
@@ -47,7 +47,7 @@ describe("markdown normalization", () => {
 
 describe("editor markdown integration", () => {
   it("parses markdown content and serializes with getMarkdown", () => {
-    const editor = new EditorCore({
+    const editor = new Editor({
       extensions: testExtensions,
       markdown: codec,
       content: "**a *b* c**",
@@ -59,18 +59,15 @@ describe("editor markdown integration", () => {
     editor.destroy();
   });
 
-  it("requires the codec for markdown content and getMarkdown", () => {
-    expect(
-      () =>
-        new EditorCore({
-          extensions: testExtensions,
-          content: "x",
-          contentType: "markdown",
-        }),
-    ).toThrow(/markdown codec/);
+  it("provides a default markdown codec", () => {
+    const editor = new Editor({
+      extensions: testExtensions,
+      content: "**a**",
+      contentType: "markdown",
+    });
 
-    const editor = new EditorCore({ extensions: testExtensions });
-    expect(() => editor.getMarkdown()).toThrow(/markdown codec/);
+    editor.state.doc.check();
+    expect(editor.getMarkdown()).toBe("**a**");
     editor.destroy();
   });
 });

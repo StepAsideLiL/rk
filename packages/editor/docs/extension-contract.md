@@ -228,7 +228,7 @@ new MarkdownCodec({
 The `Editor` class assembles the markdown, HTML and JSON codecs from the
 extensions by default. Core stays codec-free; override individual codecs through
 `codecs`, or replace only markdown with the legacy `markdown` option. React uses
-the same defaults through `<EditorProvider extensions />`.
+the same defaults through `useEditor` and `<EditorRoot editor />`.
 
 ```ts
 const extensions = [StarterKit()];

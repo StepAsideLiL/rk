@@ -27,7 +27,8 @@ each extension's `parseDOM`/`toDOM` specs.
   `StarterKit()` default bundle and the `PlaygroundKit()` playground bundle.
 - `src/editor.ts` — the `Editor` class with default markdown, HTML and JSON
   codecs.
-- `src/react` — provider, hooks, `EditorContent`, `createReactNodeView`.
+- `src/react` — `EditorRoot`, `useEditor`, hooks, `EditorContent` and
+  `createReactNodeView`.
 - `src/testing` — `createTestEditor`, `roundTrip`, `docOf`, `textOf`, `press`,
   `typeText`.
 - `docs/` — extension guide, contract reference, cookbook, HTML codec guide,

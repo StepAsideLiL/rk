@@ -120,14 +120,20 @@ in jsdom with `@testing-library/jest-dom` matchers and RTL cleanup.
 
 ```tsx
 import { render } from "@testing-library/react";
-import { EditorContent, EditorProvider } from "@rk/editor/react";
+import { EditorContent, EditorRoot, useEditor } from "@rk/editor/react";
 import { StarterKit } from "@rk/editor/extensions";
 
-const { container } = render(
-  <EditorProvider extensions={[StarterKit()]}>
-    <EditorContent />
-  </EditorProvider>,
-);
+function Demo() {
+  const editor = useEditor({ extensions: [StarterKit()] });
+
+  return (
+    <EditorRoot editor={editor}>
+      <EditorContent />
+    </EditorRoot>
+  );
+}
+
+const { container } = render(<Demo />);
 
 expect(container.querySelector(".ProseMirror")).not.toBeNull();
 ```

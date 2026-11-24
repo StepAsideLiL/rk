@@ -1,6 +1,11 @@
-import { type Editor } from "@rk/editor";
 import { PlaygroundKit } from "@rk/editor/extensions";
-import { EditorContent, EditorProvider, useEditor, useEditorState } from "@rk/editor/react";
+import {
+  EditorContent,
+  EditorRoot,
+  useCurrentEditor,
+  useEditor,
+  useEditorState,
+} from "@rk/editor/react";
 import { setBlockType } from "prosemirror-commands";
 import { useMemo, useState } from "react";
 
@@ -19,17 +24,14 @@ const htmlContent = `<h1>rk editor</h1>
 
 type InputFormat = "markdown" | "html";
 
-const buttonClass =
-  "border-border hover:bg-accent focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
-
-const selectClass =
-  "border-border bg-background focus-visible:outline-ring rounded-md border px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2";
-
-type EditorState = Editor["state"];
-
 export function EditorPage() {
   const [inputFormat, setInputFormat] = useState<InputFormat>("markdown");
   const content = inputFormat === "markdown" ? markdownContent : htmlContent;
+  const editor = useEditor({
+    extensions,
+    content,
+    contentType: inputFormat,
+  });
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -45,7 +47,7 @@ export function EditorPage() {
           <select
             aria-label="Input format"
             value={inputFormat}
-            className={selectClass}
+            className="border-border bg-background focus-visible:outline-ring rounded-md border px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
             onChange={(event) => setInputFormat(event.target.value as InputFormat)}
           >
             <option value="markdown">Markdown</option>
@@ -53,14 +55,9 @@ export function EditorPage() {
           </select>
         </label>
       </header>
-      <EditorProvider
-        key={inputFormat}
-        extensions={extensions}
-        content={content}
-        contentType={inputFormat}
-      >
+      <EditorRoot editor={editor}>
         <EditorDemo />
-      </EditorProvider>
+      </EditorRoot>
     </div>
   );
 }
@@ -83,13 +80,13 @@ function EditorDemo() {
 }
 
 function Toolbar() {
-  const editor = useEditor();
-  const bold = useEditorState((state) => isMarkActive(editor, state, "strong"));
-  const italic = useEditorState((state) => isMarkActive(editor, state, "emphasis"));
-  const heading = useEditorState((state) => {
-    const parent = state.selection.$from.parent;
+  const editor = useCurrentEditor();
+  const bold = useEditorState(() => editor.isActive("strong"));
+  const italic = useEditorState(() => editor.isActive("emphasis"));
+  const heading = useEditorState(() => {
+    const level = editor.getAttributes("heading").level;
 
-    return parent.type.name === "heading" ? Number(parent.attrs.level) : 0;
+    return typeof level === "number" ? level : 0;
   });
 
   const setHeading = (level: number) => {
@@ -109,7 +106,7 @@ function Toolbar() {
       <button
         type="button"
         aria-pressed={bold}
-        className={buttonClass}
+        className="border-border hover:bg-accent focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
         onClick={() => editor.commands.toggleBold()}
       >
         Bold
@@ -117,7 +114,7 @@ function Toolbar() {
       <button
         type="button"
         aria-pressed={italic}
-        className={buttonClass}
+        className="border-border hover:bg-accent focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
         onClick={() => editor.commands.toggleItalic()}
       >
         Italic
@@ -125,7 +122,7 @@ function Toolbar() {
       <select
         aria-label="Block type"
         value={heading}
-        className={selectClass}
+        className="border-border bg-background focus-visible:outline-ring rounded-md border px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
         onChange={(event) => setHeading(Number(event.target.value))}
       >
         <option value={0}>Paragraph</option>
@@ -140,7 +137,7 @@ function Toolbar() {
 }
 
 function MarkdownPanel() {
-  const editor = useEditor();
+  const editor = useCurrentEditor();
   const doc = useEditorState((state) => state.doc);
   const output = useMemo(() => editor.getMarkdown(), [editor, doc]);
 
@@ -148,7 +145,7 @@ function MarkdownPanel() {
 }
 
 function HtmlPanel() {
-  const editor = useEditor();
+  const editor = useCurrentEditor();
   const doc = useEditorState((state) => state.doc);
   const output = useMemo(() => editor.getHTML(), [editor, doc]);
 
@@ -164,20 +161,4 @@ function OutputPanel({ title, output }: { readonly title: string; readonly outpu
       </pre>
     </section>
   );
-}
-
-function isMarkActive(editor: Editor, state: EditorState, name: "strong" | "emphasis"): boolean {
-  const type = editor.schema.marks[name];
-
-  if (!type) {
-    return false;
-  }
-
-  const { from, to, empty, $from } = state.selection;
-
-  if (empty) {
-    return (state.storedMarks ?? $from.marks()).some((mark) => mark.type === type);
-  }
-
-  return state.doc.rangeHasMark(from, to, type);
 }

@@ -46,9 +46,10 @@ exports[`public API > snapshots the ./html entry 1`] = `
 exports[`public API > snapshots the ./react entry 1`] = `
 [
   "EditorContent",
-  "EditorProvider",
+  "EditorRoot",
   "createReactNodeView",
   "shallowEqual",
+  "useCurrentEditor",
   "useEditor",
   "useEditorState",
 ]

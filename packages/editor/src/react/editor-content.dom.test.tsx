@@ -1,23 +1,30 @@
 import { render } from "@testing-library/react";
 import { EditorView } from "prosemirror-view";
-import { StrictMode } from "react";
+import { StrictMode, type ReactNode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 
 import { EditorContent } from "./editor-content";
-import { EditorProvider } from "./editor-provider";
+import { EditorRoot } from "./editor-root";
 import { extensions } from "./test/fixtures";
+import { useEditor, type UseEditorOptions } from "./use-editor";
 
 afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function Harness({ children, ...options }: UseEditorOptions & { children: ReactNode }) {
+  const editor = useEditor(options);
+
+  return <EditorRoot editor={editor}>{children}</EditorRoot>;
+}
+
 it("mounts one live view in StrictMode and removes it on unmount", () => {
   const destroy = vi.spyOn(EditorView.prototype, "destroy");
   const { container, unmount } = render(
     <StrictMode>
-      <EditorProvider extensions={extensions}>
+      <Harness extensions={extensions}>
         <EditorContent />
-      </EditorProvider>
+      </Harness>
     </StrictMode>,
   );
 

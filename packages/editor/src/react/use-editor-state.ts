@@ -3,13 +3,13 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { EditorState } from "prosemirror-state";
 
-import { useEditor } from "./use-editor";
+import { useCurrentEditor } from "./use-current-editor";
 
 export function useEditorState<T>(
   selector: (state: EditorState) => T,
   isEqual: (left: T, right: T) => boolean = Object.is,
 ): T {
-  const editor = useEditor();
+  const editor = useCurrentEditor();
   const selectorRef = useRef(selector);
   const equalRef = useRef(isEqual);
   selectorRef.current = selector;

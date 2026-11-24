@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-import { useEditor } from "./use-editor";
+import { useCurrentEditor } from "./use-current-editor";
 
 export interface EditorContentProps {
   readonly className?: string;
 }
 
 export function EditorContent({ className }: EditorContentProps) {
-  const editor = useEditor();
+  const editor = useCurrentEditor();
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -1,15 +1,23 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TextSelection } from "prosemirror-state";
+import type { ReactNode } from "react";
 import { expect, it, vi } from "vitest";
 
 import { EditorContent } from "./editor-content";
-import { EditorProvider } from "./editor-provider";
+import { EditorRoot } from "./editor-root";
 import { extensions, jsonDoc } from "./test/fixtures";
-import { useEditor } from "./use-editor";
+import { useCurrentEditor } from "./use-current-editor";
+import { useEditor, type UseEditorOptions } from "./use-editor";
 import { useEditorState } from "./use-editor-state";
 
+function Harness({ children, ...options }: UseEditorOptions & { children: ReactNode }) {
+  const editor = useEditor(options);
+
+  return <EditorRoot editor={editor}>{children}</EditorRoot>;
+}
+
 function Actions() {
-  const editor = useEditor();
+  const editor = useCurrentEditor();
 
   return (
     <button
@@ -33,10 +41,10 @@ it("fires onChange once per document change and not for selections", () => {
   const onChange = vi.fn();
 
   render(
-    <EditorProvider extensions={extensions} onChange={onChange}>
+    <Harness extensions={extensions} onChange={onChange}>
       <Actions />
       <EditorContent />
-    </EditorProvider>,
+    </Harness>,
   );
 
   fireEvent.click(screen.getByRole("button", { name: "change" }));
@@ -47,10 +55,10 @@ it("fires onChange once per document change and not for selections", () => {
 it("updates controlled content without echoing onChange", () => {
   const onChange = vi.fn();
   const tree = (text: string) => (
-    <EditorProvider extensions={extensions} content={jsonDoc(text)} onChange={onChange}>
+    <Harness extensions={extensions} content={jsonDoc(text)} onChange={onChange}>
       <Reader />
       <EditorContent />
-    </EditorProvider>
+    </Harness>
   );
 
   const { rerender } = render(tree("one"));
@@ -65,14 +73,14 @@ it("updates controlled content without echoing onChange", () => {
 
 it("renders sanitized initial HTML content", () => {
   render(
-    <EditorProvider
+    <Harness
       extensions={extensions}
       content={"<p>html <strong>bold</strong></p><script>alert(1)</script>"}
       contentType="html"
     >
       <Reader />
       <EditorContent />
-    </EditorProvider>,
+    </Harness>,
   );
 
   expect(screen.getByRole("status")).toHaveTextContent("html bold");
@@ -83,10 +91,10 @@ it("passes sanitized HTML to onChange when outputFormat is set", () => {
   const onChange = vi.fn();
 
   render(
-    <EditorProvider extensions={extensions} outputFormat="html" onChange={onChange}>
+    <Harness extensions={extensions} outputFormat="html" onChange={onChange}>
       <Actions />
       <EditorContent />
-    </EditorProvider>,
+    </Harness>,
   );
 
   fireEvent.click(screen.getByRole("button", { name: "change" }));
@@ -97,7 +105,7 @@ it("passes sanitized HTML to onChange when outputFormat is set", () => {
 it("updates controlled HTML content without echoing onChange", () => {
   const onChange = vi.fn();
   const tree = (text: string) => (
-    <EditorProvider
+    <Harness
       extensions={extensions}
       content={`<p>${text}</p>`}
       contentType="html"
@@ -105,7 +113,7 @@ it("updates controlled HTML content without echoing onChange", () => {
     >
       <Reader />
       <EditorContent />
-    </EditorProvider>
+    </Harness>
   );
 
   const { rerender } = render(tree("one"));

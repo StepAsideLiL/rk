@@ -1,10 +1,7 @@
 export { EditorContent, type EditorContentProps } from "./editor-content";
-export {
-  EditorProvider,
-  type EditorOutputFormat,
-  type EditorProviderProps,
-} from "./editor-provider";
+export { EditorRoot, type EditorRootProps } from "./editor-root";
 export { createReactNodeView, type ReactNodeViewProps } from "./react-node-view";
 export { shallowEqual } from "./shallow-equal";
-export { useEditor } from "./use-editor";
+export { useCurrentEditor } from "./use-current-editor";
+export { useEditor, type EditorOutputFormat, type UseEditorOptions } from "./use-editor";
 export { useEditorState } from "./use-editor-state";

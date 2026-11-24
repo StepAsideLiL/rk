@@ -1,7 +1,7 @@
 import { MarkdownCodec } from "@rk/editor";
 import { PlaygroundKit, StarterKit } from "@rk/editor/extensions";
 import { HtmlCodec } from "@rk/editor/html";
-import { EditorProvider } from "@rk/editor/react";
+import { EditorRoot, useCurrentEditor, useEditor } from "@rk/editor/react";
 import { createTestEditor } from "@rk/editor/testing";
 
 const extensions = [StarterKit()];
@@ -15,8 +15,12 @@ if (editor.getMarkdown() !== "**built** package") {
   throw new Error("Built markdown round trip failed.");
 }
 
-if (typeof EditorProvider !== "function") {
-  throw new Error("React entry did not export EditorProvider.");
+if (
+  typeof EditorRoot !== "function" ||
+  typeof useEditor !== "function" ||
+  typeof useCurrentEditor !== "function"
+) {
+  throw new Error("React entry did not export the editor root and hooks.");
 }
 
 const playground = createTestEditor([PlaygroundKit()], "**playground**");

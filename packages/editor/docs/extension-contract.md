@@ -53,7 +53,7 @@ option-less factories as `Bold()`; call configured ones as
 | `inputRules` | `(context) => readonly InputRule[]`    | Typed markdown-style shortcuts.                                                      |
 | `markdown`   | `MarkdownContributions`                | Parsing and serialization.                                                           |
 | `html`       | `HtmlContributions`                    | HTML sanitizer allowlists.                                                           |
-| `extensions` | `readonly Extension<unknown>[]`        | Bundles other extensions. A bundle declares only `name` and `extensions`.            |
+| `extensions` | `readonly Extension<unknown>[]`        | Bundles other extensions. A bundle declares only `name`, `extensions` and `options`. |
 | `options`    | `Options`                              | Type-level marker only; never set at runtime.                                        |
 
 ### Bundles
@@ -72,8 +72,9 @@ new Editor({ extensions: [StarterKit()] });
 ```
 
 `StarterKit()` is the default bundle and `PlaygroundKit()` is the full bundle used
-by the playground. A bundle may only declare `name` and `extensions`; behavior
-belongs to a bundled extension, and declaring it on the bundle throws.
+by the playground. A bundle may only declare `name`, `extensions` and the
+type-level `options` marker; behavior belongs to a bundled extension, and
+declaring it on the bundle throws.
 
 ### Priority
 
@@ -184,8 +185,9 @@ interface MarkdownContributions {
   serialized children and returns the mdast wrapper.
 
 Built-in marks (`strong`, `emphasis`, `code`, `link`) do not need handlers.
-Custom marks do. The serializer nests built-ins as
-`link > strong > emphasis > code`, then custom marks in registration order.
+Custom marks do. The serializer nests built-ins as `link > strong > emphasis`,
+emits `code` as `inlineCode` leaves, then applies custom marks in registration
+order.
 
 ## HTML contributions
 
@@ -250,7 +252,7 @@ editor.getJSON();
 
 | Folder           | May import from                        |
 | ---------------- | -------------------------------------- |
-| `src/core`       | external packages only                 |
+| `src/core`       | external packages and its own modules  |
 | `src/markdown`   | `src/core`                             |
 | `src/html`       | `src/core`                             |
 | `src/editor.ts`  | `src/core`, `src/markdown`, `src/html` |

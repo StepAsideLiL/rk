@@ -1,7 +1,8 @@
 # @rk/editor
 
-Extensible rich text editor for rk. mdast is the interchange format; features are
-declarative extensions over ProseMirror.
+Extensible rich text editor for rk. Markdown is the primary interchange format,
+with HTML and JSON codecs also available; features are declarative extensions
+over ProseMirror.
 
 ## Layout
 

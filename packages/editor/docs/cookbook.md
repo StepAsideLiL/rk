@@ -22,6 +22,12 @@ export const Callout = defineExtension(() => ({
       toDOM: (node) => ["aside", { class: `callout callout-${node.attrs.tone}` }, 0],
     },
   },
+  html: {
+    sanitize: {
+      tagNames: ["aside"],
+      attributes: { aside: ["className"] },
+    },
+  },
   nodeViews: {
     callout(node, view, getPos) {
       const dom = document.createElement("aside");

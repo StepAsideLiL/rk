@@ -80,7 +80,7 @@ each extension's `parseDOM`/`toDOM` specs.
 
 Add the <NAME> extension under src/extensions/<name> following the same contract and conventions as existing extensions.
 
-Include: schema, remark plugin(s) if needed (remark-gfm for tables/tasks, remark-directive for callouts), fromMdast/toMdast, commands with typed Commands augmentation, keymap, input rules, NodeView/plugin view if needed (destroy cleanup), state in a PluginKey, an HTML sanitizer allowlist matching `parseDOM`/`toDOM`, a toolbar entry on the `apps/playground` editor page, and export from src/extensions/index.ts.
+Include: schema, remark plugin(s) and their dependencies if needed (for example `remark-gfm` for tables/tasks or `remark-directive` for callouts), fromMdast/toMdast, commands with typed Commands augmentation, keymap, input rules, NodeView/plugin view if needed (destroy cleanup), state in a PluginKey, an HTML sanitizer allowlist matching `parseDOM`/`toDOM`, a toolbar entry on the `apps/playground` editor page, and export from src/extensions/index.ts.
 
 Write the failing tests FIRST (round trips incl. nesting, empty, unicode, and the exact edge cases for this feature), confirm they fail, then implement.
 

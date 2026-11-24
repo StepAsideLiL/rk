@@ -5,7 +5,7 @@ const pages = [
     to: "/editor",
     title: "@rk/editor",
     description:
-      "Extensible ProseMirror editor with bold, italic, headings and a live markdown preview.",
+      "Extensible ProseMirror editor with bold, italic, headings and live Markdown and HTML output.",
   },
 ] as const;
 

@@ -3,7 +3,6 @@ import type { PhrasingContent } from "mdast";
 import { defineExtension } from "../../core/types";
 import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
-/** Paragraph textblock and its markdown handlers. */
 export const Paragraph = defineExtension(() => ({
   name: EXTENSION_NAMES.paragraph,
   priority: 20,

@@ -2,7 +2,6 @@ import type { BlockContent, ListItem, PhrasingContent } from "mdast";
 
 import type { Extension } from "../../core/types";
 
-/** Document node and its markdown root/doc handlers. */
 export const documentExtension: Extension<unknown> = {
   name: "test-document",
   priority: 0,
@@ -38,7 +37,6 @@ export const documentExtension: Extension<unknown> = {
   },
 };
 
-/** A node with no handlers, used to exercise unknown-node strategies. */
 export const blockquoteExtension: Extension<unknown> = {
   name: "test-blockquote",
   priority: 40,
@@ -47,7 +45,6 @@ export const blockquoteExtension: Extension<unknown> = {
   },
 };
 
-/** Paragraph node and its markdown handlers. */
 export const paragraphExtension: Extension<unknown> = {
   name: "test-paragraph",
   priority: 10,
@@ -81,7 +78,6 @@ export const paragraphExtension: Extension<unknown> = {
   },
 };
 
-/** Minimal bullet-list support used by normalization tests. */
 export const listExtension: Extension<unknown> = {
   name: "test-list",
   priority: 20,
@@ -143,7 +139,6 @@ export const listExtension: Extension<unknown> = {
   },
 };
 
-/** Marks handled by the shared mark helpers (no markdown handlers needed). */
 export const marksExtension: Extension<unknown> = {
   name: "test-marks",
   priority: 30,
@@ -155,7 +150,6 @@ export const marksExtension: Extension<unknown> = {
   },
 };
 
-/** Extensions used by the markdown tests before real feature extensions exist. */
 export const testExtensions: readonly Extension<unknown>[] = [
   documentExtension,
   paragraphExtension,

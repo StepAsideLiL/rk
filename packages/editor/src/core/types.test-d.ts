@@ -18,15 +18,15 @@ describe("core types", () => {
 
     expectTypeOf(commands.toggleBold).toEqualTypeOf<Command | undefined>();
 
-    // @ts-expect-error - only commands added by augmentation are allowed
+    // @ts-expect-error
     const unknownCommand: Partial<Commands> = { insertTable: () => true };
     expectTypeOf(unknownCommand).toEqualTypeOf<Partial<Commands>>();
   });
 
   it("rejects handlers with the wrong signature", () => {
-    // @ts-expect-error - mdast handlers receive mdast content, not a number
+    // @ts-expect-error
     const invalidMdast: MdastHandler = (_node: number) => null;
-    // @ts-expect-error - ProseMirror handlers receive a node, not a string
+    // @ts-expect-error
     const invalidPm: PmHandler = (_node: string) => null;
 
     expectTypeOf(invalidMdast).toEqualTypeOf<MdastHandler>();

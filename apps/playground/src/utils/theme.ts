@@ -4,15 +4,10 @@ type Theme = "light" | "dark";
 
 const QUERY = "(prefers-color-scheme: dark)";
 
-/** Applies the theme by toggling the `dark` class on `<html>`. */
 function apply(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
-/**
- * Starts on the system theme and keeps following it. Once the user toggles
- * with `d`, the theme is controlled manually between light and dark.
- */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() =>
     window.matchMedia(QUERY).matches ? "dark" : "light",

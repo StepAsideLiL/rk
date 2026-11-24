@@ -1,8 +1,3 @@
-/**
- * Shallow equality for selectors that return plain objects or arrays.
- *
- * Compares own enumerable keys with `Object.is`.
- */
 export function shallowEqual<T>(left: T, right: T): boolean {
   if (Object.is(left, right)) {
     return true;

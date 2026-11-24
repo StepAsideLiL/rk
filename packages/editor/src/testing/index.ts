@@ -6,12 +6,6 @@ import type { Extension } from "../core/types";
 import { Editor } from "../editor";
 import { MarkdownCodec } from "../markdown/codec";
 
-/**
- * Create a headless editor for tests.
- *
- * The markdown codec is built from the same extensions and no element is
- * provided, so the returned editor never touches the DOM.
- */
 export function createTestEditor(
   extensions: readonly Extension<unknown>[],
   content?: string,
@@ -25,7 +19,6 @@ export function createTestEditor(
   });
 }
 
-/** Serialize markdown through the editor and back, checking the document. */
 export function roundTrip(extensions: readonly Extension<unknown>[], markdown: string): string {
   const editor = createTestEditor(extensions, markdown);
   editor.state.doc.check();
@@ -33,22 +26,14 @@ export function roundTrip(extensions: readonly Extension<unknown>[], markdown: s
   return editor.getMarkdown();
 }
 
-/** The current document. */
 export function docOf(editor: Editor): PmNode {
   return editor.state.doc;
 }
 
-/** The current document's text content. */
 export function textOf(editor: Editor): string {
   return editor.state.doc.textContent;
 }
 
-/**
- * Run the keymap plugins for a key, as the view would.
- *
- * A real view is used when the editor has one; otherwise a minimal view is
- * created with the editor's state and dispatch.
- */
 export function press(editor: Editor, key: string): boolean {
   const view = editor.view ?? createMinimalView(editor);
   const event = keyboardEvent(key);
@@ -64,11 +49,6 @@ export function press(editor: Editor, key: string): boolean {
   return false;
 }
 
-/**
- * Feed text through the input rules as if it was typed at the cursor.
- *
- * Falls back to a normal insertion when no rule handles the input.
- */
 export function typeText(editor: Editor, text: string): boolean {
   const view = editor.view ?? createMinimalView(editor);
   const from = editor.state.selection.from;
@@ -88,7 +68,6 @@ export function typeText(editor: Editor, text: string): boolean {
   return handled;
 }
 
-/** Minimal view-shaped object backed by an editor's state and dispatch. */
 function createMinimalView(editor: Editor): EditorView {
   const view = {
     state: editor.state,
@@ -103,7 +82,6 @@ function createMinimalView(editor: Editor): EditorView {
   return view as unknown as EditorView;
 }
 
-/** Build a keydown event for a ProseMirror key name such as `Mod-b`. */
 function keyboardEvent(name: string): KeyboardEvent {
   const parts = name.split("-");
   const key = parts.pop() ?? name;

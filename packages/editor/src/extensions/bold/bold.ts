@@ -7,12 +7,10 @@ import { EXTENSION_NAMES, getMarkType, MARK_NAMES } from "../shared/schema";
 
 declare module "../../core/types" {
   interface Commands {
-    /** Toggle the strong mark on the selection or stored marks. */
     toggleBold: import("../../core/types").Command;
   }
 }
 
-/** Strong mark with its command, key binding and input rule. */
 export const Bold = defineExtension(() => ({
   name: EXTENSION_NAMES.bold,
   priority: 40,

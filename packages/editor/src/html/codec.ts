@@ -10,31 +10,18 @@ import { ExtensionManager } from "../core/extension-manager";
 import type { ContentCodec, Extension } from "../core/types";
 import { buildSanitizeSchema, rehypeDropDisallowed, type UnknownElementStrategy } from "./sanitize";
 
-/** Options shared by the HTML codec. */
 export interface HtmlCodecConfig {
-  /** Document used to create and parse DOM nodes. Resolved lazily. */
   readonly document?: Document;
 
-  /** What to do with elements outside the allowlist. Defaults to `unwrap`. */
   readonly unknownElement?: UnknownElementStrategy;
 }
 
-/** Options accepted by {@link HtmlCodec}. */
 export interface HtmlCodecOptions extends HtmlCodecConfig {
-  /** Extensions whose `toDOM`/`parseDOM` specs and allowlists drive the codec. */
   readonly extensions: readonly Extension<unknown>[];
 
-  /** Prebuilt schema. Derived from `extensions` when omitted. */
   readonly schema?: Schema;
 }
 
-/**
- * HTML codec built once per editor.
- *
- * Input is parsed to hast, sanitized, stringified, then handed to
- * `prosemirror-model`'s DOMParser. Output comes from the shared DOMSerializer
- * and is sanitized again as defense in depth.
- */
 export class HtmlCodec implements ContentCodec {
   private readonly document: Document | undefined;
   private readonly sanitizeSchema: SanitizeSchema;
@@ -56,7 +43,6 @@ export class HtmlCodec implements ContentCodec {
     const windowDocument = resolveDocument(this.document);
     const container = windowDocument.createElement("div");
 
-    // The string is sanitized before it reaches `innerHTML`.
     container.innerHTML = sanitizeHtml(this.processor, html);
 
     return this.parserFor(targetSchema).parse(container);
@@ -97,7 +83,6 @@ export class HtmlCodec implements ContentCodec {
   }
 }
 
-/** Create the parse → sanitize → stringify processor once per codec. */
 function createSanitizeProcessor(
   schema: SanitizeSchema,
   strategy: UnknownElementStrategy | undefined,
@@ -105,7 +90,6 @@ function createSanitizeProcessor(
   const plugins: PluggableList = [];
 
   if ((strategy ?? "unwrap") === "drop") {
-    // `buildSanitizeSchema` always sets tagNames.
     plugins.push(rehypeDropDisallowed(schema.tagNames!));
   }
 
@@ -114,12 +98,10 @@ function createSanitizeProcessor(
   return unified().use(rehypeParse, { fragment: true }).use(plugins);
 }
 
-/** Sanitize a string through the shared processor. */
 function sanitizeHtml(processor: ReturnType<typeof createSanitizeProcessor>, html: string): string {
   return String(processor.processSync(html));
 }
 
-/** Resolve the document lazily so the codec can be created in Node. */
 function resolveDocument(injected: Document | undefined): Document {
   const document = injected ?? globalThis.document;
 

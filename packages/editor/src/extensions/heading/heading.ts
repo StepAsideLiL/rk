@@ -8,25 +8,16 @@ import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
 declare module "../../core/types" {
   interface Commands {
-    /** Toggle the current block between paragraph and the first heading level. */
     setHeading: import("../../core/types").Command;
   }
 }
 
-/** Heading configuration. */
 export interface HeadingOptions {
-  /** Levels this extension contributes. Defaults to all six levels. */
   readonly levels?: readonly number[];
 }
 
 const DEFAULT_LEVELS: readonly number[] = Object.freeze([1, 2, 3, 4, 5, 6]);
 
-/**
- * Heading textblocks for the configured levels.
- *
- * `setHeading` toggles between paragraph and the first configured level; the
- * keymap and input rule cover the individual levels.
- */
 export const Heading = defineExtension((options: HeadingOptions): Extension<HeadingOptions> => {
   const levels = normalizeLevels(options.levels);
   const primaryLevel = levels[0] ?? 1;
@@ -140,7 +131,6 @@ export const Heading = defineExtension((options: HeadingOptions): Extension<Head
   };
 });
 
-/** Validate and sort configured levels. */
 function normalizeLevels(levels: readonly number[] | undefined): number[] {
   const normalized = [...new Set(levels ?? DEFAULT_LEVELS)].sort((left, right) => left - right);
 

@@ -197,7 +197,6 @@ describe("Editor with an element", () => {
   });
 });
 
-/** Minimal paragraph document used by autofocus tests. */
 function paragraphContent(text: string) {
   return {
     type: "doc",

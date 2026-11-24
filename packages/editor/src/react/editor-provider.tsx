@@ -10,53 +10,28 @@ import {
 import type { ContentCodec, ContentType, Extension } from "../core/types";
 import { Editor } from "../editor";
 
-/** Serialized format passed to `onChange` when `outputFormat` is set. */
 export type EditorOutputFormat = ContentType;
 
-/** Props for {@link EditorProvider}. */
 export interface EditorProviderProps {
-  /** Extensions used to create the editor. Read once on mount. */
   readonly extensions: readonly Extension<unknown>[];
 
-  /** Initial document, or a controlled value when it changes. */
   readonly content?: EditorContentValue;
 
-  /** Interpretation of string content. Defaults to `"json"`. */
   readonly contentType?: EditorContentType;
 
-  /** Markdown codec from `MarkdownCodec`, kept for compatibility. */
   readonly markdown?: ContentCodec;
 
-  /** Optional codec overrides keyed by content type. */
   readonly codecs?: Partial<Record<ContentType, ContentCodec>>;
 
-  /**
-   * Serialized format passed as the second `onChange` argument.
-   *
-   * When omitted, `onChange` keeps its original `(editor) => void` behavior.
-   */
   readonly outputFormat?: EditorOutputFormat;
 
-  /**
-   * Called once per document-changing transaction from the editor itself.
-   *
-   * The second argument is set only when `outputFormat` is provided.
-   */
   readonly onChange?: (editor: Editor, output?: string) => void;
 
   readonly children?: ReactNode;
 }
 
-/** Internal editor context. Use {@link useEditor}. */
 export const EditorContext = createContext<Editor | null>(null);
 
-/**
- * Create the editor outside React's render cycle and provide it to children.
- *
- * The editor is created in an effect so StrictMode's double mount produces one
- * live instance. The ProseMirror view is created separately by
- * {@link EditorContent}.
- */
 export function EditorProvider({
   extensions,
   content,
@@ -114,7 +89,6 @@ export function EditorProvider({
   return <EditorContext.Provider value={editor}>{editor ? children : null}</EditorContext.Provider>;
 }
 
-/** Serialize the editor in the requested output format. */
 function serialize(editor: Editor, format: EditorOutputFormat): string {
   switch (format) {
     case "html":

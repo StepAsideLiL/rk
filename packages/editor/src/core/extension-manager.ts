@@ -19,69 +19,37 @@ import type {
   PmMarkHandler,
 } from "./types";
 
-/** Priority used when an extension does not specify one. */
 const DEFAULT_PRIORITY = 100;
 
-/** Options that control how extensions are assembled. */
 export interface ExtensionManagerOptions {
-  /** Complete schema spec. Every node and mark must have a matching extension. */
   readonly schemaSpec?: SchemaSpec;
 }
 
-/** Options for the generated plugin list. */
 export interface CreatePluginsOptions {
-  /** Whether input rules run, or the extensions whose rules should run. */
   readonly inputRules?: boolean | readonly (Extension<unknown> | string)[];
 }
 
-/**
- * Markdown contributions collected from every extension.
- *
- * The markdown module reads these maps and passes `remarkPlugins` to unified, so
- * core never needs to import the parsing pipeline.
- */
 export interface CollectedMarkdown {
-  /** Handlers keyed by mdast node type. */
   readonly fromMdast: Readonly<Record<string, MdastHandler>>;
 
-  /** Handlers keyed by ProseMirror node type. */
   readonly toMdast: Readonly<Record<string, PmHandler>>;
 
-  /** Mark parsers keyed by mdast node type. */
   readonly markFromMdast: Readonly<Record<string, MdastMarkHandler>>;
 
-  /** Mark serializers keyed by ProseMirror mark name. */
   readonly markToMdast: Readonly<Record<string, PmMarkHandler>>;
 
-  /** unified/remark plugins merged from every extension. */
   readonly remarkPlugins: readonly UnifiedPlugin[];
 }
 
-/**
- * Validated extension set with the contributions they define.
- *
- * The manager owns schema assembly, command collection and plugin ordering. It
- * is created once per editor and stays immutable after construction.
- */
 export class ExtensionManager {
-  /** Extensions in stable, ascending priority order. */
   readonly extensions: readonly Extension<unknown>[];
 
-  /** Schema assembled from every extension's nodes and marks. */
   readonly schema: Schema;
 
-  /** Markdown contributions exposed for the markdown module. */
   readonly markdown: CollectedMarkdown;
 
-  /** Node views merged from every extension, keyed by node type. */
   readonly nodeViews: Readonly<Record<string, NodeViewConstructor>>;
 
-  /**
-   * Validate, order and merge a set of extensions.
-   *
-   * Throws when two extensions share a name, when a `requires` entry is missing
-   * or when no `doc` node was contributed.
-   */
   constructor(extensions: readonly Extension<unknown>[], options: ExtensionManagerOptions = {}) {
     this.extensions = orderExtensions(flattenExtensions(extensions));
     this.schema = options.schemaSpec
@@ -91,7 +59,6 @@ export class ExtensionManager {
     this.nodeViews = collectNodeViews(this.extensions);
   }
 
-  /** Collect commands from every extension, in priority order. */
   createCommands(context: ExtensionContext): Readonly<Record<string, Command>> {
     const commands: Record<string, Command> = {};
 
@@ -102,19 +69,11 @@ export class ExtensionManager {
     return commands;
   }
 
-  /** Build the ordered ProseMirror plugin list for an editor. */
   createPlugins(context: ExtensionContext, options: CreatePluginsOptions = {}): readonly Plugin[] {
     return createPlugins(this.extensions, context, options);
   }
 }
 
-/**
- * Validate names and dependencies, then sort by priority.
- *
- * Sorting is stable: extensions with the same priority keep their declaration
- * order, and a lower value is merged earlier so the first block node wins as the
- * default block.
- */
 function orderExtensions(extensions: readonly Extension<unknown>[]): readonly Extension<unknown>[] {
   const names = new Set<string>();
 
@@ -147,7 +106,6 @@ function orderExtensions(extensions: readonly Extension<unknown>[]): readonly Ex
     .map(({ extension }) => extension);
 }
 
-/** Merge nodes and marks in priority order, then build the schema. */
 function mergeSchema(extensions: readonly Extension<unknown>[]): Schema {
   const nodes: Record<string, NodeSpec> = {};
   const marks: Record<string, MarkSpec> = {};
@@ -166,7 +124,6 @@ function mergeSchema(extensions: readonly Extension<unknown>[]): Schema {
   return new Schema({ nodes, marks });
 }
 
-/** Merge markdown handlers and remark plugins in priority order. */
 function collectMarkdown(extensions: readonly Extension<unknown>[]): CollectedMarkdown {
   const fromMdast: Record<string, MdastHandler> = {};
   const toMdast: Record<string, PmHandler> = {};
@@ -200,7 +157,6 @@ function collectMarkdown(extensions: readonly Extension<unknown>[]): CollectedMa
   };
 }
 
-/** Merge node views in priority order, letting higher priorities win. */
 function collectNodeViews(
   extensions: readonly Extension<unknown>[],
 ): Record<string, NodeViewConstructor> {
@@ -213,14 +169,6 @@ function collectNodeViews(
   return nodeViews;
 }
 
-/**
- * Build plugins.
- *
- * Keymaps are grouped by priority tier and emitted highest priority first, so
- * the first matching binding (the higher priority one) wins a conflict. Input
- * rules follow the same direction, extension plugins keep schema order and
- * history is always last.
- */
 function createPlugins(
   extensions: readonly Extension<unknown>[],
   context: ExtensionContext,
@@ -279,12 +227,10 @@ function createPlugins(
   return plugins;
 }
 
-/** Priority with the default applied. */
 function priorityOf(extension: Extension<unknown>): number {
   return extension.priority ?? DEFAULT_PRIORITY;
 }
 
-/** Build a schema from an external spec and verify extension coverage. */
 function schemaFromSpec(spec: SchemaSpec, extensions: readonly Extension<unknown>[]): Schema {
   const schema = new Schema(spec);
   const extensionNodes = new Set<string>();
@@ -331,7 +277,6 @@ function schemaFromSpec(spec: SchemaSpec, extensions: readonly Extension<unknown
   return schema;
 }
 
-/** Whether an extension's input rules should be installed. */
 function inputRulesEnabled(
   extension: Extension<unknown>,
   filter: CreatePluginsOptions["inputRules"],

@@ -11,52 +11,28 @@ import type { ContentCodec, Extension } from "../core/types";
 import { fromMdastRoot, toMdastRoot } from "./convert";
 import type { UnknownNodeStrategy } from "./types";
 
-/**
- * Unknown-node strategy used when none is configured.
- *
- * Development is strict so missing handlers are caught in tests; production
- * keeps unknown content instead of throwing in front of users.
- */
 const DEFAULT_UNKNOWN: UnknownNodeStrategy = defaultUnknownNodeStrategy(import.meta.env.DEV);
 
-/** Default strategy for a development or production build. */
 export function defaultUnknownNodeStrategy(development: boolean): UnknownNodeStrategy {
   return development ? "throw" : "preserve";
 }
 
-/**
- * Formatting defaults chosen to be stable and canonical.
- *
- * `*` for emphasis/strong and `-` for bullets match the normalization contract,
- * and callers can override any of them through {@link MarkdownCodecOptions.stringify}.
- */
 const STRINGIFY_DEFAULTS = Object.freeze({
   emphasis: "*",
   strong: "*",
   bullet: "-",
 } as const satisfies Readonly<RemarkStringifyOptions>);
 
-/** Options shared by the markdown codec. */
 export interface MarkdownCodecConfig {
-  /** What to do with nodes that have no registered handler. */
   readonly unknownNode?: UnknownNodeStrategy;
 
-  /** Options forwarded to remark-stringify. */
   readonly stringify?: Readonly<RemarkStringifyOptions>;
 }
 
-/** Options accepted by {@link MarkdownCodec}. */
 export interface MarkdownCodecOptions extends MarkdownCodecConfig {
-  /** Extensions whose schema and markdown handlers drive the codec. */
   readonly extensions: readonly Extension<unknown>[];
 }
 
-/**
- * Markdown codec built once per editor.
- *
- * Parsing and stringifying processors are created in the constructor and reused
- * for every call, including the remark plugins contributed by extensions.
- */
 export class MarkdownCodec implements ContentCodec {
   private readonly manager: ExtensionManager;
   private readonly strategy: UnknownNodeStrategy;
@@ -88,7 +64,6 @@ export class MarkdownCodec implements ContentCodec {
   }
 }
 
-/** Create the remark parse processor, including extension plugins. */
 function createParseProcessor(remarkPlugins: readonly UnifiedPlugin[]) {
   const processor = unified().use(remarkParse);
 
@@ -99,7 +74,6 @@ function createParseProcessor(remarkPlugins: readonly UnifiedPlugin[]) {
   return processor;
 }
 
-/** Create the remark stringify processor, including extension plugins. */
 function createStringifyProcessor(
   remarkPlugins: readonly UnifiedPlugin[],
   options: Readonly<RemarkStringifyOptions> | undefined,

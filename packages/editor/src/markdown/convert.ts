@@ -6,13 +6,6 @@ import type { FromMdastState, ToMdastState } from "../core/types";
 import { inlineFromMdast, inlineToMdast, withMdastMarks } from "./marks";
 import type { UnknownNodeStrategy } from "./types";
 
-/**
- * Convert an mdast root into a ProseMirror document.
- *
- * The `root` handler is preferred. Without one, `preserve` converts the root's
- * children as blocks, `drop` returns an empty document and `throw` reports the
- * missing handler.
- */
 export function fromMdastRoot(
   root: Root,
   schema: Schema,
@@ -58,12 +51,6 @@ export function fromMdastRoot(
   return doc;
 }
 
-/**
- * Convert a ProseMirror document into an mdast root.
- *
- * The `doc` handler (keyed by the ProseMirror node type) supplies the root's
- * children. Unknown documents follow the configured strategy.
- */
 export function toMdastRoot(
   doc: PmNode,
   handlers: CollectedMarkdown,
@@ -92,7 +79,6 @@ export function toMdastRoot(
   return { type: "root", children };
 }
 
-/** Build the helper state passed to mdast handlers. */
 function createFromMdastState(
   schema: Schema,
   handlers: CollectedMarkdown,
@@ -135,7 +121,6 @@ function createFromMdastState(
   return state;
 }
 
-/** Build the helper state passed to ProseMirror handlers. */
 function createToMdastState(
   schema: Schema,
   handlers: CollectedMarkdown,
@@ -165,7 +150,6 @@ function createToMdastState(
   return state;
 }
 
-/** Convert one mdast block node through the registry. */
 function convertBlock(
   node: Content,
   state: FromMdastState,
@@ -185,7 +169,6 @@ function convertBlock(
   return preserveBlock(node, state, strategy);
 }
 
-/** Convert one ProseMirror node through the registry. */
 function convertPmNode(
   node: PmNode,
   state: ToMdastState,
@@ -205,7 +188,6 @@ function convertPmNode(
   return preservePmNode(node, state, strategy);
 }
 
-/** Apply the unknown-node strategy to an mdast block node. */
 function preserveBlock(
   node: Content,
   state: FromMdastState,
@@ -232,7 +214,6 @@ function preserveBlock(
   return [];
 }
 
-/** Apply the unknown-node strategy to an mdast inline node. */
 function preserveInline(
   node: PhrasingContent,
   marks: readonly Mark[],
@@ -258,7 +239,6 @@ function preserveInline(
   return [];
 }
 
-/** Apply the unknown-node strategy to a ProseMirror node. */
 function preservePmNode(
   node: PmNode,
   state: ToMdastState,
@@ -283,17 +263,14 @@ function preservePmNode(
   return state.block(node.content.content);
 }
 
-/** Error raised by the `throw` strategy for mdast nodes. */
 function unknownMdastError(type: string): Error {
   return new Error(`No markdown handler for mdast node "${type}".`);
 }
 
-/** Error raised by the `throw` strategy for ProseMirror nodes. */
 function unknownPmError(type: string): Error {
   return new Error(`No markdown handler for ProseMirror node "${type}".`);
 }
 
-/** Normalize a handler result to an array. */
 function toArray<T>(value: T | readonly T[]): T[] {
   return Array.isArray(value) ? [...value] : [value as T];
 }

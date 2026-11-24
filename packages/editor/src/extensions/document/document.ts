@@ -3,7 +3,6 @@ import type { BlockContent } from "mdast";
 import { defineExtension } from "../../core/types";
 import { EXTENSION_NAMES, getNodeType, NODE_NAMES } from "../shared/schema";
 
-/** Root document node and its markdown handlers. */
 export const Document = defineExtension(() => ({
   name: EXTENSION_NAMES.document,
   priority: 0,

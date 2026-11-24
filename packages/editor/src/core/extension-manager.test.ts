@@ -386,7 +386,6 @@ describe("ExtensionManager", () => {
   });
 });
 
-/** Whether a plugin handles text input, which the input-rules plugin does. */
 function hasTextInput(plugin: { props: { handleTextInput?: unknown } }): boolean {
   return typeof plugin.props.handleTextInput === "function";
 }

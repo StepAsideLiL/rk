@@ -5,13 +5,6 @@ import type { EditorState } from "prosemirror-state";
 
 import { useEditor } from "./use-editor";
 
-/**
- * Subscribe to a slice of editor state.
- *
- * The selector runs against `EditorState`, and the component only re-renders
- * when `isEqual` reports a change. Pass {@link shallowEqual} for selectors that
- * return objects.
- */
 export function useEditorState<T>(
   selector: (state: EditorState) => T,
   isEqual: (left: T, right: T) => boolean = Object.is,

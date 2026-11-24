@@ -13,7 +13,6 @@ import { HtmlCodec } from "./codec";
 import { document, extensions, roundTripHtml } from "./test/fixtures";
 import { buildSanitizeSchema } from "./sanitize";
 
-/** Link mark used to exercise protocol allowlists. */
 const Link = defineExtension(() => ({
   name: "test-link",
   priority: 60,

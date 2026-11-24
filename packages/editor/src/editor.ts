@@ -18,59 +18,42 @@ import type {
 import { HtmlCodec } from "./html/codec";
 import { MarkdownCodec } from "./markdown/codec";
 
-/** Content accepted by {@link Editor}. */
 export type EditorContent = PmNode | string | { readonly [key: string]: unknown };
 
-/** How string content should be interpreted. */
 export type EditorContentType = ContentType;
 
-/** Text direction applied to the editor DOM. */
 export type TextDirection = "ltr" | "rtl" | "auto";
 
-/** Where the cursor should go when the editor is mounted. */
 export type Autofocus = "start" | "end" | "all" | number | boolean | null;
 
-/** Built-in behavior options that do not belong to a feature extension. */
 export interface CoreExtensionOptions {
-  /** `tabindex` attribute for the editable element. */
   readonly tabindex?: {
-    /** Explicit value. Defaults to `"0"` for editable editors. */
     readonly value?: string;
   };
 }
 
-/** Context passed to a custom leaf text serializer. */
 export interface TextSerializerContext {
   readonly node: PmNode;
 }
 
-/** Serialize a leaf node to plain text. Return `false` to skip it. */
 export type TextSerializer = (context: TextSerializerContext) => string | false;
 
-/** Options accepted by {@link Editor.getText}. */
 export interface GetTextOptions {
-  /** Text inserted between block nodes. Defaults to `"\n\n"`. */
   readonly blockSeparator?: string;
 
-  /** Leaf serializers keyed by node type name. */
   readonly textSerializers?: Readonly<Record<string, TextSerializer>>;
 }
 
-/** A node or mark type accepted by {@link Editor.isActive}. */
 export type NodeOrMarkType = NodeType | MarkType;
 
-/** A name or type accepted by {@link Editor.isActive}. */
 export type IsActiveTarget = string | NodeOrMarkType | null;
 
-/** Chain returned by {@link Editor.chain}. */
 export type CommandChain = {
   readonly [Name in keyof Commands]: () => CommandChain;
 } & {
-  /** Run every queued command in order. */
   run(): boolean;
 };
 
-/** JSON codec used when no custom one is injected. */
 export class JsonCodec implements ContentCodec {
   parse(content: string, schema: Schema): PmNode {
     return schema.nodeFromJSON(JSON.parse(content));
@@ -81,100 +64,57 @@ export class JsonCodec implements ContentCodec {
   }
 }
 
-/** Shared JSON codec instance. */
 export const jsonCodec: ContentCodec = new JsonCodec();
 
-/** Options accepted by {@link Editor}. */
 export interface EditorOptions {
-  /** Extensions to assemble, in any order. */
   readonly extensions: readonly Extension<unknown>[];
 
-  /** Complete schema spec. Every node and mark needs a matching extension. */
   readonly schemaSpec?: SchemaSpec;
 
-  /** Initial document. Defaults to an empty document from the schema. */
   readonly content?: EditorContent;
 
-  /** Interpretation of string content. Defaults to `"json"`. */
   readonly contentType?: EditorContentType;
 
-  /** Mount the editable view into this element. Omit or pass null to stay headless. */
   readonly element?: HTMLElement | null;
 
-  /** Whether users can edit the document. Defaults to `true`. */
   readonly editable?: boolean;
 
-  /** Text direction applied to the editor element. */
   readonly textDirection?: TextDirection;
 
-  /** Move the cursor or selection when the view is created. */
   readonly autofocus?: Autofocus;
 
-  /** Extra attributes and handlers forwarded to ProseMirror. */
   readonly editorProps?: EditorProps;
 
-  /** Built-in behavior options, currently the editor `tabindex`. */
   readonly coreExtensionOptions?: CoreExtensionOptions;
 
-  /** Whether input rules run, or the extensions whose rules should run. */
   readonly enableInputRules?: boolean | readonly (Extension<unknown> | string)[];
 
-  /**
-   * Optional codec overrides keyed by content type.
-   *
-   * JSON falls back to the built-in codec; markdown and HTML default to codecs
-   * built from the extensions.
-   */
   readonly codecs?: Partial<Record<ContentType, ContentCodec>>;
 
-  /**
-   * Legacy markdown codec override.
-   *
-   * Prefer `codecs.markdown`; when omitted, a markdown codec is built from the
-   * extensions.
-   */
   readonly markdown?: ContentCodec;
 }
 
-/** A command bound to an editor: state and dispatch are already applied. */
 export type BoundCommand = () => boolean;
 
-/** Commands exposed by an editor, keyed by the augmented {@link Commands}. */
 export type BoundCommands = { readonly [Name in keyof Commands]: BoundCommand };
 
-/** Events emitted by an editor. */
 export interface EditorEvents {
-  /** Fired for every transaction, before the `update` event. */
   transaction: Transaction;
 
-  /** Fired after a transaction has been applied to the state. */
   update: EditorState;
 
-  /** Fired once when the editor is destroyed. */
   destroy: undefined;
 }
 
-/** Removes a listener previously registered with {@link Editor.on}. */
 export type Unsubscribe = () => void;
 
-/** Transaction meta key for content set from outside the editor. */
 export const CONTROLLED_UPDATE_META = "rk-editor:controlled-update";
 
-/**
- * Editor with default markdown, HTML and JSON codecs.
- *
- * Defaults can be overridden through `codecs` or the legacy `markdown` option.
- * The ProseMirror view is only created when `element` is provided, so the same
- * class works in Node for tests and on the server.
- */
 export class Editor {
-  /** The schema assembled from the extensions. */
   readonly schema: Schema;
 
-  /** Commands that dispatch against the current state. */
   readonly commands: BoundCommands;
 
-  /** Dry-run versions of the commands: they never dispatch. */
   readonly can: BoundCommands;
 
   private readonly manager: ExtensionManager;
@@ -222,37 +162,30 @@ export class Editor {
     this.can = this.bindCommands(contributed, true);
   }
 
-  /** The mounted ProseMirror view, or `undefined` in headless mode. */
   get view(): EditorView | undefined {
     return this.editorView;
   }
 
-  /** The current editor state. */
   get state(): EditorState {
     return this.currentState();
   }
 
-  /** Whether users can currently edit the document. */
   get isEditable(): boolean {
     return this.editable;
   }
 
-  /** Whether the document has no text content. */
   get isEmpty(): boolean {
     return this.currentState().doc.textContent.length === 0;
   }
 
-  /** Whether the editor view currently owns DOM focus. */
   get isFocused(): boolean {
     return this.editorView?.hasFocus() ?? false;
   }
 
-  /** Whether {@link destroy} has been called. */
   get isDestroyed(): boolean {
     return this.destroyed;
   }
 
-  /** Create and mount a view for this editor, replacing any existing view. */
   createView = (element: HTMLElement): EditorView => {
     if (this.destroyed) {
       throw new Error("Cannot create a view for a destroyed editor.");
@@ -270,21 +203,17 @@ export class Editor {
     return this.editorView;
   };
 
-  /** Mount the editor into a DOM element. */
   mount = (element: HTMLElement): EditorView => this.createView(element);
 
-  /** Unmount the view while keeping the editor state intact. */
   unmount = (): void => {
     this.destroyView();
   };
 
-  /** Destroy the attached view without destroying the editor itself. */
   destroyView = (): void => {
     this.editorView?.destroy();
     this.editorView = undefined;
   };
 
-  /** Destroy the view and release every listener and plugin resource. */
   destroy = (): void => {
     if (this.destroyed) {
       return;
@@ -296,12 +225,10 @@ export class Editor {
     this.emitter.clear();
   };
 
-  /** Apply a transaction to the editor, updating state and view. */
   dispatch = (transaction: Transaction): void => {
     this.applyTransaction(transaction);
   };
 
-  /** Update runtime options whose changes can be applied without rebuilding. */
   setOptions(options: Partial<EditorOptions>): void {
     if (this.destroyed) {
       return;
@@ -324,7 +251,6 @@ export class Editor {
     this.applyViewProps();
   }
 
-  /** Change the editable state and optionally emit an update event. */
   setEditable(editable: boolean, emitUpdate = true): void {
     if (this.destroyed || this.editable === editable) {
       return;
@@ -338,16 +264,12 @@ export class Editor {
     }
   }
 
-  /** Serialize the current document to markdown using the active codec. */
   getMarkdown = (): string => this.codecs.markdown.serialize(this.currentState().doc);
 
-  /** Serialize the current document to HTML using the active codec. */
   getHTML = (): string => this.codecs.html.serialize(this.currentState().doc);
 
-  /** Serialize the current document to JSON. */
   getJSON = (): string => this.codecs.json.serialize(this.currentState().doc);
 
-  /** Serialize the document to plain text. */
   getText(options: GetTextOptions = {}): string {
     const doc = this.currentState().doc;
     const serializers = options.textSerializers ?? {};
@@ -365,7 +287,6 @@ export class Editor {
     });
   }
 
-  /** Read the attributes of the active node or mark type. */
   getAttributes(typeOrName: string | NodeOrMarkType): Record<string, unknown> {
     const { state } = this;
     const type = resolveType(state.schema, typeOrName);
@@ -385,7 +306,6 @@ export class Editor {
     return node ? { ...node.attrs } : {};
   }
 
-  /** Whether the selected node or mark is active, optionally matching attributes. */
   isActive(
     nameOrAttributes: IsActiveTarget | Readonly<Record<string, unknown>>,
     attributes?: Readonly<Record<string, unknown>>,
@@ -424,7 +344,6 @@ export class Editor {
     );
   }
 
-  /** Register a ProseMirror plugin on the running editor. */
   registerPlugin(
     plugin: Plugin,
     handlePlugins?: (newPlugin: Plugin, plugins: Plugin[]) => Plugin[],
@@ -439,7 +358,6 @@ export class Editor {
     this.replacePlugins(next);
   }
 
-  /** Unregister a plugin by its `PluginKey` or plugin key name. */
   unregisterPlugin(nameOrPluginKey: string | PluginKey): void {
     if (this.destroyed) {
       return;
@@ -452,7 +370,6 @@ export class Editor {
     this.replacePlugins(next);
   }
 
-  /** Queue registered commands and run them as one operation. */
   chain(): CommandChain {
     const queued: Array<keyof Commands> = [];
     const registry = this.registry;
@@ -483,13 +400,6 @@ export class Editor {
     return chain;
   }
 
-  /**
-   * Replace the document from outside the editor.
-   *
-   * Skips no-op updates and marks the transaction with
-   * {@link CONTROLLED_UPDATE_META}, so controlled React content does not echo
-   * back through `onChange`.
-   */
   setContent = (content: EditorContent, contentType?: EditorContentType): void => {
     if (this.destroyed) {
       return;
@@ -510,13 +420,11 @@ export class Editor {
     this.applyTransaction(transaction);
   };
 
-  /** Subscribe to an editor event. Returns an unsubscribe function. */
   on = <Event extends keyof EditorEvents>(
     event: Event,
     listener: (payload: EditorEvents[Event]) => void,
   ): Unsubscribe => this.emitter.on(event, listener);
 
-  /** View props assembled from options and current editable state. */
   private viewProps(): EditorProps {
     return {
       ...this.options.editorProps,
@@ -543,7 +451,6 @@ export class Editor {
     };
   }
 
-  /** Apply the current view props without replacing state. */
   private applyViewProps(): void {
     this.editorView?.setProps({
       ...this.viewProps(),
@@ -552,7 +459,6 @@ export class Editor {
     });
   }
 
-  /** Resolve the `tabindex` attribute from options and editable state. */
   private tabindex(): string | undefined {
     const configured = this.options.coreExtensionOptions?.tabindex?.value;
 
@@ -563,7 +469,6 @@ export class Editor {
     return this.editable ? "0" : undefined;
   }
 
-  /** Focus the view and apply the configured autofocus selection. */
   private applyAutofocus(): void {
     const autofocus = this.options.autofocus;
     const view = this.editorView;
@@ -582,14 +487,12 @@ export class Editor {
     view.focus();
   }
 
-  /** Replace the plugin list, preserving the document and selection. */
   private replacePlugins(plugins: readonly Plugin[]): void {
     const state = this.currentState().reconfigure({ plugins: [...plugins] });
     this.editorState = state;
     this.editorView?.updateState(state);
   }
 
-  /** Run queued commands against a working state, committing on success. */
   private runChain(names: readonly (keyof Commands)[]): boolean {
     if (this.destroyed) {
       return false;
@@ -667,7 +570,6 @@ export class Editor {
   }
 }
 
-/** Resolve the codecs, filling in defaults for missing formats. */
 function resolveCodecs(options: EditorOptions): Record<ContentType, ContentCodec> {
   return {
     json: options.codecs?.json ?? jsonCodec,
@@ -679,7 +581,6 @@ function resolveCodecs(options: EditorOptions): Record<ContentType, ContentCodec
   };
 }
 
-/** Resolve the initial document from the options. */
 function resolveContent(
   content: EditorContent | undefined,
   contentType: EditorContentType | undefined,
@@ -716,7 +617,6 @@ function resolveContent(
   return codec.parse(content, schema);
 }
 
-/** Resolve the selection requested by the autofocus option. */
 function resolveAutofocusSelection(doc: PmNode, autofocus: Autofocus): Selection | undefined {
   if (autofocus === "start") {
     return Selection.atStart(doc);
@@ -739,7 +639,6 @@ function resolveAutofocusSelection(doc: PmNode, autofocus: Autofocus): Selection
   return undefined;
 }
 
-/** Resolve a node or mark type from a name or type. */
 function resolveType(
   schema: Schema,
   typeOrName: string | NodeOrMarkType,
@@ -749,12 +648,10 @@ function resolveType(
   return schema.marks[name] ?? schema.nodes[name];
 }
 
-/** Whether a node or mark type is a mark in this schema. */
 function isMarkType(schema: Schema, type: NodeOrMarkType): type is MarkType {
   return schema.marks[type.name] === type;
 }
 
-/** Marks that apply to the current selection. */
 function activeMarks(state: EditorState): readonly Mark[] {
   const { selection } = state;
 
@@ -775,7 +672,6 @@ function activeMarks(state: EditorState): readonly Mark[] {
   return marks;
 }
 
-/** Nodes relevant to the current selection, nearest first. */
 function candidateNodes(state: EditorState): readonly PmNode[] {
   const { $from, $to } = state.selection;
   const nodes: PmNode[] = [];
@@ -799,14 +695,12 @@ function candidateNodes(state: EditorState): readonly PmNode[] {
   return nodes;
 }
 
-/** Whether a value is a node or mark type rather than an attribute filter. */
 function isAttributes(
   value: IsActiveTarget | Readonly<Record<string, unknown>>,
 ): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !("name" in value && "schema" in value);
 }
 
-/** Match ProseMirror attributes against a partial filter. */
 function attributesMatch(
   attrs: Readonly<Record<string, unknown>>,
   filter?: Readonly<Record<string, unknown>>,
@@ -818,12 +712,10 @@ function attributesMatch(
   return Object.entries(filter).every(([name, value]) => attrs[name] === value);
 }
 
-/** Read the internal key name from a plugin key. */
 function pluginKeyName(key: PluginKey): string | undefined {
   return (key as PluginKey & { readonly key?: string }).key;
 }
 
-/** Whether a plugin matches a key object or key name. */
 function pluginMatchesKey(plugin: Plugin, key: string | PluginKey): boolean {
   const pluginKey = plugin.spec.key;
 
@@ -840,7 +732,6 @@ function pluginMatchesKey(plugin: Plugin, key: string | PluginKey): boolean {
   return name === key || name?.startsWith(`${key}$`) === true;
 }
 
-/** Minimal typed emitter for editor events. */
 class EditorEmitter {
   private readonly listeners = new Map<keyof EditorEvents, Set<(payload: unknown) => void>>();
 
@@ -874,7 +765,6 @@ class EditorEmitter {
   }
 }
 
-/** Mutable command registry used while the editor is being assembled. */
 class MutableCommandRegistry implements CommandRegistry {
   private readonly commands: Record<string, Command> = Object.create(null);
 

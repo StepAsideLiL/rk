@@ -28,5 +28,4 @@ export {
 export * from "./markdown/marks";
 export type { UnknownNodeStrategy } from "./markdown/types";
 
-/** Human-readable package name. */
 export const EDITOR_NAME = "@rk/editor";

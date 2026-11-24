@@ -4,21 +4,12 @@ import type { Mark, Node as PmNode, Schema } from "prosemirror-model";
 import type { RootContent as Content } from "mdast";
 import type { PmMarkHandler } from "../core/types";
 
-/** mdast nodes that map to a ProseMirror mark. */
 export type MdastMark = Strong | Emphasis | InlineCode | Link;
 
-/**
- * Deterministic outer-to-inner order used when re-nesting marks.
- *
- * `link` wraps `strong`, which wraps `emphasis`. `code` is a leaf and is
- * emitted as `inlineCode` instead of a parent node.
- */
 export const MARK_ORDER = Object.freeze(["link", "strong", "emphasis", "code"] as const);
 
-/** Name of a mark handled by the shared mark helpers. */
 export type MarkName = (typeof MARK_ORDER)[number];
 
-/** Whether this mdast node is a mark wrapper handled by {@link markFromMdast}. */
 export function isMdastMark(node: PhrasingContent): node is MdastMark {
   return (
     node.type === "strong" ||
@@ -28,12 +19,6 @@ export function isMdastMark(node: PhrasingContent): node is MdastMark {
   );
 }
 
-/**
- * Map an mdast mark node to a ProseMirror mark.
- *
- * Returns `null` when the schema does not define the matching mark; callers
- * then keep descending without adding a mark so no content is lost.
- */
 export function markFromMdast(node: MdastMark, schema: Schema): Mark | null {
   switch (node.type) {
     case "strong":
@@ -52,24 +37,14 @@ export function markFromMdast(node: MdastMark, schema: Schema): Mark | null {
   }
 }
 
-/** Callback used when an inline mdast node cannot be converted by the helpers. */
 export type UnknownMdastInline = (node: PhrasingContent, marks: readonly Mark[]) => PmNode[] | null;
 
-/** Options for {@link inlineFromMdast}. */
 export interface InlineFromMdastOptions {
-  /** Called for inline nodes that are neither text nor a known mark wrapper. */
   readonly onUnknown?: UnknownMdastInline;
 
-  /** Custom mark parser keyed by mdast node type. */
   readonly markFromMdast?: (node: PhrasingContent) => Mark | null;
 }
 
-/**
- * Convert mdast phrasing content into flat ProseMirror text nodes.
- *
- * Marks are accumulated while descending, so nested mdast mark wrappers become
- * mark sets on the resulting text nodes instead of nested ProseMirror structure.
- */
 export function inlineFromMdast(
   children: readonly PhrasingContent[],
   schema: Schema,
@@ -118,19 +93,14 @@ export function inlineFromMdast(
   }
 }
 
-/** Callback used for inline ProseMirror nodes without a registered handler. */
 export type ConvertPmInlineNode = (node: PmNode) => Content[] | null;
 
-/** Options for {@link inlineToMdast}. */
 export interface InlineToMdastOptions {
-  /** Called for non-text ProseMirror nodes. */
   readonly onNode?: ConvertPmInlineNode;
 
-  /** Custom mark serializers keyed by ProseMirror mark name. */
   readonly markToMdast?: Readonly<Record<string, PmMarkHandler>>;
 }
 
-/** One piece of inline content before mark nesting is reconstructed. */
 type InlinePart =
   | { readonly kind: "text"; readonly value: string; readonly marks: readonly Mark[] }
   | {
@@ -140,16 +110,8 @@ type InlinePart =
     }
   | { readonly kind: "node"; readonly node: Content };
 
-/** Order in which mark parents are nested, outer to inner. */
 const NESTING_ORDER = Object.freeze(["link", "strong", "emphasis"] as const);
 
-/**
- * Convert ProseMirror inline content into mdast phrasing content.
- *
- * Adjacent text with the same marks is merged. Marks are re-nested in a
- * deterministic order (`link` > `strong` > `emphasis`), and a `code` mark is
- * emitted as an `inlineCode` leaf.
- */
 export function inlineToMdast(
   nodes: readonly PmNode[],
   options: InlineToMdastOptions = {},
@@ -189,11 +151,6 @@ export function inlineToMdast(
   return result;
 }
 
-/**
- * Apply mark wrappers to a single mdast node.
- *
- * Only text nodes can gain marks; block nodes are returned unchanged.
- */
 export function withMdastMarks(node: Content, marks: readonly Mark[]): Content {
   if (marks.length === 0 || node.type !== "text") {
     return node;
@@ -205,7 +162,6 @@ export function withMdastMarks(node: Content, marks: readonly Mark[]): Content {
   return result[0]!;
 }
 
-/** Merge adjacent text or inline-code parts that carry identical marks. */
 function mergeParts(parts: readonly InlinePart[]): InlinePart[] {
   const merged: InlinePart[] = [];
 
@@ -240,7 +196,6 @@ function mergeParts(parts: readonly InlinePart[]): InlinePart[] {
   return merged;
 }
 
-/** Whether two mark sets are identical in name and attributes. */
 function sameMarks(left: readonly Mark[], right: readonly Mark[]): boolean {
   if (left === right) {
     return true;
@@ -253,7 +208,6 @@ function sameMarks(left: readonly Mark[], right: readonly Mark[]): boolean {
   return left.every((mark, index) => right[index]!.eq(mark));
 }
 
-/** Recursively wrap parts in mark nodes in nesting order. */
 function build(
   parts: readonly InlinePart[],
   depth: number,
@@ -299,7 +253,6 @@ function build(
   }
 }
 
-/** Emit a leaf part. */
 function leaf(part: InlinePart): Content {
   switch (part.kind) {
     case "text":
@@ -311,7 +264,6 @@ function leaf(part: InlinePart): Content {
   }
 }
 
-/** Build a mark parent for a run of parts. */
 function markParent(
   name: string,
   run: readonly InlinePart[],
@@ -346,7 +298,6 @@ function markParent(
   return serializer(mark, children);
 }
 
-/** Find a mark by name among text-like parts. */
 function findMark(run: readonly InlinePart[], name: string): Mark | undefined {
   for (const part of run) {
     /* v8 ignore next 3 */
@@ -361,7 +312,6 @@ function findMark(run: readonly InlinePart[], name: string): Mark | undefined {
   return undefined;
 }
 
-/** Whether a part carries a given mark. */
 function partHasMark(part: InlinePart, name: string): boolean {
   if (part.kind === "node") {
     return false;
@@ -370,7 +320,6 @@ function partHasMark(part: InlinePart, name: string): boolean {
   return hasMark(part.marks, name);
 }
 
-/** Whether a mark set contains a mark name. */
 function hasMark(marks: readonly Mark[], name: string): boolean {
   return marks.some((mark) => mark.type.name === name);
 }

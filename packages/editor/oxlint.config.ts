@@ -164,15 +164,12 @@ export default defineConfig({
         "src/**/test/**",
       ],
       rules: {
-        // Tests may assemble the public entry points to exercise integration.
         "no-restricted-imports": "off",
       },
     },
     {
       files: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.test-d.ts", "src/**/test/**"],
       rules: {
-        // Tests may exercise DOM-facing behavior (for example plugin view
-        // lifecycles) even when the source folder itself must stay DOM-free.
         "no-restricted-globals": "off",
       },
     },

@@ -697,12 +697,10 @@ describe("Editor", () => {
   });
 });
 
-/** Select a range in an editor. */
 function select(editor: Editor, from: number, to: number): void {
   editor.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, from, to)));
 }
 
-/** Whether the editor installed an input-rules plugin. */
 function hasInputRules(editor: Editor): boolean {
   return editor.state.plugins.some((plugin) => typeof plugin.props.handleTextInput === "function");
 }

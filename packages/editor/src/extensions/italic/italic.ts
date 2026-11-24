@@ -7,12 +7,10 @@ import { EXTENSION_NAMES, getMarkType, MARK_NAMES } from "../shared/schema";
 
 declare module "../../core/types" {
   interface Commands {
-    /** Toggle the emphasis mark on the selection or stored marks. */
     toggleItalic: import("../../core/types").Command;
   }
 }
 
-/** Emphasis mark with its command, key binding and input rule. */
 export const Italic = defineExtension(() => ({
   name: EXTENSION_NAMES.italic,
   priority: 50,

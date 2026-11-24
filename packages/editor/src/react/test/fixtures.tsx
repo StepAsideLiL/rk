@@ -1,7 +1,7 @@
-import { starterKit } from "../../extensions/index";
+import { StarterKit } from "../../extensions/index";
 
 /** Shared extensions for React tests. */
-export const extensions = starterKit();
+export const extensions = [StarterKit()];
 
 /** Minimal JSON document containing a single paragraph. */
 export function jsonDoc(text: string) {

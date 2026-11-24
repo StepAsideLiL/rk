@@ -6,10 +6,10 @@ many other structures that HTML can.
 
 ```ts
 import { Editor } from "@rk/editor";
-import { starterKit } from "@rk/editor/extensions";
+import { StarterKit } from "@rk/editor/extensions";
 
 const editor = new Editor({
-  extensions: starterKit(),
+  extensions: [StarterKit()],
   content: "<h1>Hi</h1><p><strong>HTML</strong></p>",
   contentType: "html",
 });
@@ -52,10 +52,10 @@ The codec accepts an injectable `document`:
 ```ts
 import { parseHTML } from "linkedom";
 import { HtmlCodec } from "@rk/editor/html";
-import { starterKit } from "@rk/editor/extensions";
+import { StarterKit } from "@rk/editor/extensions";
 
 const { document } = parseHTML("<!doctype html><html><body></body></html>");
-const codec = new HtmlCodec({ extensions: starterKit(), document });
+const codec = new HtmlCodec({ extensions: [StarterKit()], document });
 ```
 
 The document is resolved lazily inside `parse`/`serialize`, never at module

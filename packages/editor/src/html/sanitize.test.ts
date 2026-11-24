@@ -8,8 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { ExtensionManager } from "../core/extension-manager";
 import { defineExtension, type Extension } from "../core/types";
-import { Document, Paragraph, Text } from "../extensions/index";
-import { starterKit } from "../extensions/index";
+import { Document, Paragraph, StarterKit, Text } from "../extensions/index";
 import { HtmlCodec } from "./codec";
 import { document, extensions, roundTripHtml } from "./test/fixtures";
 import { buildSanitizeSchema } from "./sanitize";
@@ -139,12 +138,18 @@ describe("HTML sanitizer", () => {
 });
 
 describe("HTML allowlists", () => {
-  const manager = new ExtensionManager(starterKit());
+  const manager = new ExtensionManager([StarterKit()]);
   const sanitizer = unified()
     .use(rehypeParse, { fragment: true })
-    .use(rehypeSanitize, buildSanitizeSchema(starterKit()))
+    .use(rehypeSanitize, buildSanitizeSchema([StarterKit()]))
     .use(rehypeStringify);
   const serializer = DOMSerializer.fromSchema(manager.schema);
+
+  it("expands bundle extensions before collecting allowlists", () => {
+    expect(buildSanitizeSchema([StarterKit()]).tagNames).toEqual(
+      expect.arrayContaining(["p", "h1", "strong", "em"]),
+    );
+  });
 
   it("merges protocols and normalizes attribute tuples", () => {
     const custom: Extension<unknown> = {

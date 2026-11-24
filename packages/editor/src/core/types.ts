@@ -248,6 +248,16 @@ export interface Extension<Options = void> {
   /** Names of extensions that must also be present. */
   readonly requires?: readonly string[];
 
+  /**
+   * Extensions bundled by this extension.
+   *
+   * A bundle groups other extensions so callers can install them as one unit.
+   * The manager expands bundles recursively before validating and merging, so
+   * the bundle itself may only declare `name` and `extensions`; behavior
+   * belongs to a bundled extension.
+   */
+  readonly extensions?: readonly Extension<unknown>[];
+
   /** Schema nodes contributed by this extension, keyed by node type. */
   readonly nodes?: Readonly<Record<string, NodeSpec>>;
 

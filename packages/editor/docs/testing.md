@@ -28,7 +28,7 @@ import { createTestEditor, docOf, press, roundTrip, textOf, typeText } from "@rk
 ```ts
 import { expect, it } from "vitest";
 import { roundTrip } from "@rk/editor/testing";
-import { starterKit } from "@rk/editor/extensions";
+import { StarterKit } from "@rk/editor/extensions";
 
 it.each([
   ["**a**", "**a**"],
@@ -36,7 +36,7 @@ it.each([
   ["# a", "# a"],
   ["**a *b* c**", "**a *b* c**"],
 ])("round trips %s", (input, expected) => {
-  expect(roundTrip(starterKit(), input)).toBe(expected);
+  expect(roundTrip([StarterKit()], input)).toBe(expected);
 });
 ```
 
@@ -49,7 +49,7 @@ it.each([
 import { TextSelection } from "prosemirror-state";
 import { createTestEditor, docOf } from "@rk/editor/testing";
 
-const editor = createTestEditor(starterKit(), "a");
+const editor = createTestEditor([StarterKit()], "a");
 const { doc } = editor.state;
 
 editor.dispatch(editor.state.tr.setSelection(TextSelection.create(doc, 1, doc.content.size - 1)));
@@ -71,7 +71,7 @@ Type the text before the final trigger character, then let `typeText` run the
 input-rules plugin:
 
 ```ts
-const editor = createTestEditor(starterKit(), "");
+const editor = createTestEditor([StarterKit()], "");
 editor.dispatch(editor.state.tr.insertText("**bold*"));
 
 expect(typeText(editor, "*")).toBe(true);
@@ -84,7 +84,7 @@ The same pattern tests headings (`"##"` then `" "`) and custom rules such as
 ## Keymaps
 
 ```ts
-const editor = createTestEditor(starterKit(), "a");
+const editor = createTestEditor([StarterKit()], "a");
 // select the paragraph text first
 expect(press(editor, "Mod-b")).toBe(true);
 ```
@@ -121,10 +121,10 @@ in jsdom with `@testing-library/jest-dom` matchers and RTL cleanup.
 ```tsx
 import { render } from "@testing-library/react";
 import { EditorContent, EditorProvider } from "@rk/editor/react";
-import { starterKit } from "@rk/editor/extensions";
+import { StarterKit } from "@rk/editor/extensions";
 
 const { container } = render(
-  <EditorProvider extensions={starterKit()}>
+  <EditorProvider extensions={[StarterKit()]}>
     <EditorContent />
   </EditorProvider>,
 );
@@ -174,10 +174,10 @@ The HTML codec needs a DOM only when parsing or serializing. Inject a
 ```ts
 import { parseHTML } from "linkedom";
 import { HtmlCodec } from "@rk/editor/html";
-import { starterKit } from "@rk/editor/extensions";
+import { StarterKit } from "@rk/editor/extensions";
 
 const { document } = parseHTML("<!doctype html><html><body></body></html>");
-const codec = new HtmlCodec({ extensions: starterKit(), document });
+const codec = new HtmlCodec({ extensions: [StarterKit()], document });
 ```
 
 HTML suites cover round trips, XSS, messy pasted markup, cross-format

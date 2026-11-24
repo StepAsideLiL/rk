@@ -9,6 +9,8 @@ export const EXTENSION_NAMES = Object.freeze({
   bold: "bold",
   italic: "italic",
   selection: "selection",
+  starterKit: "starter-kit",
+  playgroundKit: "playground-kit",
 } as const);
 
 /** Node names shared between extensions. */

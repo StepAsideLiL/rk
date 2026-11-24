@@ -1,10 +1,10 @@
 import { test } from "vitest";
 
 import { ExtensionManager } from "../core/extension-manager";
-import { starterKit } from "../extensions/index";
+import { StarterKit } from "../extensions/index";
 import { MarkdownCodec } from "../markdown/codec";
 
-const extensions = starterKit();
+const extensions = [StarterKit()];
 const manager = new ExtensionManager(extensions);
 const codec = new MarkdownCodec({ extensions });
 const markdown = Array.from(

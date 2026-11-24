@@ -53,7 +53,27 @@ option-less factories as `Bold()`; call configured ones as
 | `inputRules` | `(context) => readonly InputRule[]`    | Typed markdown-style shortcuts.                                                      |
 | `markdown`   | `MarkdownContributions`                | Parsing and serialization.                                                           |
 | `html`       | `HtmlContributions`                    | HTML sanitizer allowlists.                                                           |
+| `extensions` | `readonly Extension<unknown>[]`        | Bundles other extensions. A bundle declares only `name` and `extensions`.            |
 | `options`    | `Options`                              | Type-level marker only; never set at runtime.                                        |
+
+### Bundles
+
+An extension that declares `extensions` groups other extensions so callers can
+install them as one unit. The manager expands bundles recursively before
+validating names and merging contributions:
+
+```ts
+export const StarterKit = defineExtension(() => ({
+  name: "starter-kit",
+  extensions: [Document(), Text(), Paragraph(), Heading({}), Bold(), Italic(), Selection()],
+}));
+
+new Editor({ extensions: [StarterKit()] });
+```
+
+`StarterKit()` is the default bundle and `PlaygroundKit()` is the full bundle used
+by the playground. A bundle may only declare `name` and `extensions`; behavior
+belongs to a bundled extension, and declaring it on the bundle throws.
 
 ### Priority
 
@@ -209,7 +229,7 @@ Core never imports extensions, markdown or React. Applications assemble the
 codec and editor explicitly:
 
 ```ts
-const extensions = starterKit();
+const extensions = [StarterKit()];
 const editor = new Editor({
   extensions,
   content: "# Hi",

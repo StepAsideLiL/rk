@@ -24,8 +24,8 @@ each extension's `parseDOM`/`toDOM` specs.
   helpers. No DOM.
 - `src/html` — sanitized rehype pipeline, DOM parsing/serialization and
   sanitizer schema merging. No imports outside core.
-- `src/extensions` — one folder per feature, plus `shared/` helpers and
-  `starterKit()`.
+- `src/extensions` — one folder per feature, plus `shared/` helpers, the
+  `StarterKit()` default bundle and the `PlaygroundKit()` playground bundle.
 - `src/editor.ts` — public `Editor` class that assembles the markdown, HTML and
   JSON codecs.
 - `src/react` — provider, hooks, `EditorContent`, `createReactNodeView`.

@@ -170,6 +170,61 @@ describe("ExtensionManager", () => {
     expect(low).not.toHaveBeenCalled();
   });
 
+  it("expands nested bundles into a flat extension list", () => {
+    const bundle = extension("bundle", {
+      extensions: [
+        documentExtension(),
+        extension("nested", { extensions: [paragraphExtension()] }),
+      ],
+    });
+    const manager = new ExtensionManager([bundle]);
+
+    expect(manager.extensions.map((candidate) => candidate.name)).toEqual([
+      "paragraph",
+      "document",
+    ]);
+    expect(manager.schema.nodes.doc).toBeDefined();
+    expect(manager.schema.nodes.paragraph).toBeDefined();
+  });
+
+  it("rejects duplicates introduced by a bundle", () => {
+    const bundle = extension("bundle", {
+      extensions: [documentExtension(), paragraphExtension()],
+    });
+
+    expect(() => new ExtensionManager([bundle, paragraphExtension()])).toThrow(
+      'Duplicate extension name "paragraph"',
+    );
+  });
+
+  it("rejects bundles that also declare behavior", () => {
+    const bundle = extension("bundle", {
+      extensions: [documentExtension()],
+      nodes: { extra: { group: "block" } },
+    });
+
+    expect(() => new ExtensionManager([bundle])).toThrow(/Bundles may only declare/);
+  });
+
+  it("rejects circular bundles", () => {
+    const bundle: { name: string; extensions: Extension<unknown>[] } = {
+      name: "bundle",
+      extensions: [],
+    };
+
+    bundle.extensions.push(bundle);
+
+    expect(() => new ExtensionManager([bundle])).toThrow(/Circular extension bundle/);
+  });
+
+  it("validates requirements across bundle boundaries", () => {
+    const bundle = extension("bundle", {
+      extensions: [documentExtension(), extension("bold", { requires: ["italic"] })],
+    });
+
+    expect(() => new ExtensionManager([bundle])).toThrow('Extension "bold" requires "italic"');
+  });
+
   it("collects markdown handlers and remark plugins in priority order", () => {
     const lowHandler = vi.fn(() => null);
     const highHandler = vi.fn(() => null);

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestEditor, docOf, roundTrip, textOf } from "../testing";
-import { starterKit } from "./index";
+import { createTestEditor, docOf, roundTrip, textOf } from "../../testing";
+import { StarterKit } from "./starter-kit";
 
-describe("starterKit", () => {
+const extensions = [StarterKit()];
+
+describe("StarterKit", () => {
   it("provides the default schema and editor behavior", () => {
-    const editor = createTestEditor(starterKit(), "# **a** *b*");
+    const editor = createTestEditor(extensions, "# **a** *b*");
 
     expect(editor.schema.nodes.doc).toBeDefined();
     expect(editor.schema.nodes.paragraph).toBeDefined();
@@ -24,6 +26,6 @@ describe("starterKit", () => {
     ["## a", "## a"],
     ["**a *b* c**", "**a *b* c**"],
   ])("round trips %s", (input, expected) => {
-    expect(roundTrip(starterKit(), input)).toBe(expected);
+    expect(roundTrip(extensions, input)).toBe(expected);
   });
 });

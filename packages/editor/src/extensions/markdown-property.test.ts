@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 
 import { ExtensionManager } from "../core/extension-manager";
 import { MarkdownCodec } from "../markdown/codec";
-import { starterKit } from "./index";
+import { StarterKit } from "./starter-kit/starter-kit";
 
-const extensions = starterKit();
+const extensions = [StarterKit()];
 const manager = new ExtensionManager(extensions);
 const codec = new MarkdownCodec({ extensions });
 const schema = manager.schema;

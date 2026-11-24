@@ -30,7 +30,7 @@ playground at `/editor` (`pnpm playground` from the repo root).
 
 ## Inactive selection
 
-`starterKit()` includes `Selection()`. When the editor loses focus, the last
+`StarterKit()` includes `Selection()`. When the editor loses focus, the last
 text selection stays visible with a dim gray background instead of disappearing.
 Theme it with the `--rk-selection-inactive-bg` custom property, or add
 `Selection()` to a custom extension set.

@@ -8,6 +8,7 @@ import type { Plugin } from "prosemirror-state";
 import type { NodeViewConstructor } from "prosemirror-view";
 import type { Plugin as UnifiedPlugin } from "unified";
 
+import { flattenExtensions } from "./flatten-extensions";
 import type {
   Command,
   Extension,
@@ -70,7 +71,7 @@ export class ExtensionManager {
    * or when no `doc` node was contributed.
    */
   constructor(extensions: readonly Extension<unknown>[]) {
-    this.extensions = orderExtensions(extensions);
+    this.extensions = orderExtensions(flattenExtensions(extensions));
     this.schema = mergeSchema(this.extensions);
     this.markdown = collectMarkdown(this.extensions);
     this.nodeViews = collectNodeViews(this.extensions);

@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ExtensionManager } from "../core/extension-manager";
-import { starterKit } from "../extensions/index";
 import { Editor } from "../index";
 import { HtmlCodec } from "./codec";
 import { document, extensions } from "./test/fixtures";
@@ -97,7 +96,7 @@ describe("editor HTML integration", () => {
     vi.unstubAllGlobals();
 
     const editor = new Editor({
-      extensions: starterKit(),
+      extensions,
       content: "# x",
       contentType: "markdown",
     });

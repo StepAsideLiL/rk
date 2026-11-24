@@ -204,10 +204,20 @@ as an `inlineCode` leaf and never wrapped by a custom mark.
 // src/extensions/index.ts
 export { Highlight } from "./highlight/highlight";
 
-// starterKit
-export function starterKit() {
-  return [Document(), Text(), Paragraph(), Heading({}), Bold(), Italic(), Selection(), Highlight()];
-}
+// Add the extension to the playground bundle.
+export const PlaygroundKit = defineExtension(() => ({
+  name: EXTENSION_NAMES.playgroundKit,
+  extensions: [
+    Document(),
+    Text(),
+    Paragraph(),
+    Heading({}),
+    Bold(),
+    Italic(),
+    Selection(),
+    Highlight(),
+  ],
+}));
 ```
 
 A toolbar entry can read the active mark and call the command:

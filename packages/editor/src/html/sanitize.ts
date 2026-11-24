@@ -2,6 +2,7 @@ import type { Element, ElementContent, Root, RootContent } from "hast";
 import type { Options as SanitizeSchema } from "rehype-sanitize";
 import type { Plugin } from "unified";
 
+import { flattenExtensions } from "../core/flatten-extensions";
 import type { Extension, HtmlAttributeDefinition } from "../core/types";
 
 /** Strategy for elements outside the allowlist. */
@@ -57,7 +58,7 @@ export function buildSanitizeSchema(extensions: readonly Extension<unknown>[]): 
     src: [...BASE_PROTOCOLS.src],
   };
 
-  for (const extension of extensions) {
+  for (const extension of flattenExtensions(extensions)) {
     const sanitize = extension.html?.sanitize;
 
     if (!sanitize) {

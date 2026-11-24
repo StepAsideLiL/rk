@@ -2,11 +2,11 @@ import { parseHTML } from "linkedom";
 
 import type { Extension } from "../../core/types";
 import { ExtensionManager } from "../../core/extension-manager";
-import { starterKit } from "../../extensions/index";
+import { StarterKit } from "../../extensions/index";
 import { HtmlCodec } from "../codec";
 
 /** Shared extensions for HTML tests. */
-export const extensions = starterKit();
+export const extensions = [StarterKit()];
 
 /** Linkedom document injected into the codec. */
 export const document = parseHTML("<!doctype html><html><body></body></html>")

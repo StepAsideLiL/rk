@@ -1,10 +1,10 @@
 import { type Editor } from "@rk/editor";
-import { starterKit } from "@rk/editor/extensions";
+import { PlaygroundKit } from "@rk/editor/extensions";
 import { EditorContent, EditorProvider, useEditor, useEditorState } from "@rk/editor/react";
 import { setBlockType } from "prosemirror-commands";
 import { useMemo, useState } from "react";
 
-const extensions = starterKit();
+const extensions = [PlaygroundKit()];
 
 const markdownContent = `# rk editor
 

@@ -6,7 +6,6 @@ import {
   useEditor,
   useEditorState,
 } from "@rk/editor/react";
-import { setBlockType } from "prosemirror-commands";
 import { useMemo, useState } from "react";
 
 const extensions = [PlaygroundKit()];
@@ -96,9 +95,13 @@ function Toolbar() {
       return;
     }
 
-    const command = level === 0 ? setBlockType(nodeType) : setBlockType(nodeType, { level });
+    const { state } = editor;
+    const { from, to } = state.selection;
+    const transaction = state.tr.setBlockType(from, to, nodeType, level === 0 ? null : { level });
 
-    command(editor.state, editor.dispatch, editor.view);
+    if (transaction.docChanged) {
+      editor.dispatch(transaction);
+    }
   };
 
   return (

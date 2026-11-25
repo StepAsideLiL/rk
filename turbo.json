@@ -3,17 +3,35 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["out/**", "dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "lint": {},
-    "//#lint:root": {},
     "format": {},
+    "format:check": {},
+    "lint": {},
+    "lint:fix": {},
+    "package": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "package:linux": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "package:mac": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "package:win": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "test": {},
     "typecheck": {},
+    "//#lint:root": {},
     "//#typecheck:root": {}
   }
 }

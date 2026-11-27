@@ -24,14 +24,17 @@ Vite apps; there is no build step.
 
 ## Layout
 
-- `src/primitive/<name>.ts` — the framework-free primitive: state, changes,
-  parts, and ARIA. No React, no DOM.
+- `src/primitive/<name>/primitive.ts` — the framework-free primitive: state,
+  changes, parts, and ARIA. No React, no DOM.
+- `src/primitive/<name>/index.ts` — exports one primitive and its options type.
+- `src/primitive/index.ts` — primitive exports for the `@rk/ui` entry.
 - `src/primitive/primitives.test.ts` — Vitest coverage for primitive state and
   part attributes.
-- `src/react/<name>.tsx` — the React rendering of a primitive via `createParts`;
-  every file starts with `"use client"`.
-- `src/react/index.ts` — React part exports.
-- `src/index.ts` — primitive exports.
+- `src/react/<name>/<name>.tsx` — the React rendering of a primitive via
+  `createParts`; every file starts with `"use client"`.
+- `src/react/<name>/index.ts` — exports one component's React parts.
+- `src/react/index.ts` — React part exports for the `@rk/ui/react` entry.
+- `oxfmt.config.ts` and `oxlint.config.ts` — package formatting and lint rules.
 - `README.md`, `vitest.config.ts`, and `tsconfig.json` — package introduction,
   test setup, and typechecking.
 
@@ -41,8 +44,10 @@ Vite apps; there is no build step.
   changing a component.
 - Keep primitives framework-free: no React imports, no DOM access, and no
   styling. Each framework renders them from its own folder.
-- React parts must come from `createParts` in `src/react/<name>.tsx` and
-  re-export from `src/react/index.ts`. Primitives re-export from `src/index.ts`.
+- React parts must come from `createParts` in `src/react/<name>/<name>.tsx` and
+  re-export from `src/react/<name>/index.ts` and `src/react/index.ts`.
+  Primitives re-export from `src/primitive/<name>/index.ts` and
+  `src/primitive/index.ts`.
 - To support another frontend library, add `src/<framework>/`, a
   `./<framework>` export, and the matching `@ui-sdk/<framework>` adapter
   package. The primitives do not change.

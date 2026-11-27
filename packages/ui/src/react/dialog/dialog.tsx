@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react";
 import { createParts } from "@ui-sdk/react/primitive";
-import { dialog } from "../primitive/dialog";
+import { dialog } from "../../primitive/dialog";
 
 const parts = createParts(dialog, {
   trigger: "button",

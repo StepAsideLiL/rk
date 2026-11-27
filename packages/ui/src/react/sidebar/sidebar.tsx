@@ -2,7 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { createParts } from "@ui-sdk/react/primitive";
-import { sidebar } from "../primitive/sidebar";
+import { sidebar } from "../../primitive/sidebar";
 
 const parts = createParts(sidebar, {
   root: "div",

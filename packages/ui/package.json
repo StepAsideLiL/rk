@@ -3,13 +3,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
+    "./primitive": {
       "types": "./src/primitive/index.ts",
       "default": "./src/primitive/index.ts"
     },
     "./react": {
       "types": "./src/react/index.ts",
       "default": "./src/react/index.ts"
+    },
+    "./global.css": {
+      "types": "./src/style/global.css",
+      "default": "./src/style/global.css"
     }
   },
   "scripts": {
@@ -20,7 +24,8 @@
   },
   "dependencies": {
     "@ui-sdk/core": "0.1.0-beta.10",
-    "@ui-sdk/react": "0.1.0-beta.10"
+    "@ui-sdk/react": "0.1.0-beta.10",
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "oxfmt": "catalog:",

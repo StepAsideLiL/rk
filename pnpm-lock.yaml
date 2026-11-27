@@ -466,6 +466,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.3.5
     devDependencies:
       oxfmt:
         specifier: 'catalog:'

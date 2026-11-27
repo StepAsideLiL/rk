@@ -11,8 +11,9 @@ Vite apps; there is no build step.
   `pnpm --filter @rk/ui test`.
 - Local scripts: `lint`, `lint:fix`, `test`, `typecheck`. There is no `build`
   script.
-- Entries: `@rk/ui` exports the framework-free primitives; `@rk/ui/react`
-  exports the React parts.
+- Entries: `@rk/ui/primitive` exports the framework-free primitives;
+  `@rk/ui/react` exports the React parts; `@rk/ui/global.css` exports the
+  Tailwind and theme stylesheet.
 - Before using ui-sdk, follow the ui-sdk skill if it is installed.
 - Read `node_modules/@ui-sdk/react/docs/llms.txt` to see what is available.
 - To build a new component, also search
@@ -27,13 +28,15 @@ Vite apps; there is no build step.
 - `src/primitive/<name>/primitive.ts` — the framework-free primitive: state,
   changes, parts, and ARIA. No React, no DOM.
 - `src/primitive/<name>/index.ts` — exports one primitive and its options type.
-- `src/primitive/index.ts` — primitive exports for the `@rk/ui` entry.
+- `src/primitive/index.ts` — primitive exports for the `@rk/ui/primitive` entry.
 - `src/primitive/primitives.test.ts` — Vitest coverage for primitive state and
   part attributes.
 - `src/react/<name>/<name>.tsx` — the React rendering of a primitive via
   `createParts`; every file starts with `"use client"`.
 - `src/react/<name>/index.ts` — exports one component's React parts.
 - `src/react/index.ts` — React part exports for the `@rk/ui/react` entry.
+- `src/style/global.css` — the exported `@rk/ui/global.css` stylesheet:
+  Tailwind import, theme tokens, `@theme` utilities, and shared styles.
 - `oxfmt.config.ts` and `oxlint.config.ts` — package formatting and lint rules.
 - `README.md`, `vitest.config.ts`, and `tsconfig.json` — package introduction,
   test setup, and typechecking.
@@ -54,8 +57,10 @@ Vite apps; there is no build step.
 - Primitives report changes through `createChange` and declare
   `agent: { actions }`; the app controls values with `<key>` / `on<Key>Change`.
 - Components render no styles; style parts from `data-slot` and state
-  attributes. Apps declare `@layer ui-sdk;` at the top of their global
-  stylesheet.
+  attributes. `src/style/global.css` declares `@layer ui-sdk;`; apps import
+  `@rk/ui/global.css`.
+- `tailwindcss` is a package dependency so the exported stylesheet can resolve
+  the Tailwind import.
 - Keep this package source-only. Do not add a build step unless the consumption
   model changes.
 - Add or update Vitest coverage for primitive state, part attributes, and

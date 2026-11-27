@@ -26,4 +26,4 @@ configured in `react-router.config.ts`.
 
 - Default theme follows the system (`prefers-color-scheme`).
 - Press `d` anywhere to toggle between light and dark.
-- Theme tokens (colors, radius) live in `src/global.css` and are exposed as Tailwind utilities such as `bg-background` and `text-foreground`.
+- Theme tokens (colors, radius) live in `@rk/ui/global.css` (`packages/ui/src/style/global.css`) and are exposed as Tailwind utilities such as `bg-background` and `text-foreground`.

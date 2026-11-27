@@ -33,11 +33,13 @@ monorepo.
   index route.
 - `src/components/` holds shared UI such as the app frame and `ui-page.tsx`.
 - `src/utils/theme.ts` holds theme detection and the keyboard toggle.
-- `src/global.css` defines the Tailwind import, shadcn-style oklch tokens,
-  `@theme` utilities, and playground-only component styles.
+- `@rk/ui/global.css` (from `packages/ui/src/style/global.css`) defines the
+  Tailwind import, shadcn-style oklch tokens, `@theme` utilities, and shared
+  component styles.
 - `react-router.config.ts` enables SPA mode and points the app directory at
-  `src`; `vite.config.ts` wires the React Router and Tailwind plugins plus the
-  editor source aliases. `tsconfig.json` mirrors those aliases for typechecking.
+  `src`; `vite.config.ts` wires the React Router and Tailwind plugins, the
+  editor source aliases, and prebundles the entry/UI deps to avoid first-load
+  optimize-dep 504s. `tsconfig.json` mirrors those aliases for typechecking.
 - `README.md` documents the available pages and theme behavior.
 
 ## Rules
@@ -50,9 +52,9 @@ monorepo.
 - Import packages through their public entry points. The editor source alias is
   for local development; do not reach into other package internals.
 - Use `@rk/ui` exports for UI demos under `src/routes/ui.react.*`.
-- Keep theme tokens and Tailwind setup in `src/global.css`. Use the existing
-  utilities (`bg-background`, `text-foreground`, ...) instead of hard-coded
-  colors.
+- Keep theme tokens and Tailwind setup in `packages/ui/src/style/global.css`,
+  imported as `@rk/ui/global.css`. Use the existing utilities
+  (`bg-background`, `text-foreground`, ...) instead of hard-coded colors.
 - Preserve the theme behavior: follow the system theme by default and toggle
   light/dark with `d` unless a task explicitly changes it.
 - Use workspace `catalog:` versions for shared dependencies; never pin them in

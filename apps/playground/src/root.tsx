@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { Links, Meta, Scripts, ScrollRestoration } from "react-router";
 
+import "@rk/ui/global.css";
+
 import { AppShell } from "./components/app-shell";
-import "./global.css";
 
 const themeScript = `document.documentElement.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);`;
 

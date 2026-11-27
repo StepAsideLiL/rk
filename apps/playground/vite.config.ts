@@ -8,6 +8,21 @@ const editorSrc = decodeURIComponent(
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter()],
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react-router",
+      "react-router/dom",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+      "@ui-sdk/core",
+      "@ui-sdk/core/dialog",
+      "@ui-sdk/core/tooltip",
+      "@ui-sdk/react/primitive",
+    ],
+  },
   resolve: {
     alias: [
       { find: /^@rk\/editor$/, replacement: `${editorSrc}index.ts` },

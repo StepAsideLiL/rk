@@ -86,7 +86,7 @@
   }
 }
 
-/* Content rendered by the @rk/editor playground page. */
+/* Rich text rendered by ProseMirror. */
 .ProseMirror {
   @apply min-h-32 outline-none;
 }
@@ -127,7 +127,7 @@
   @apply mt-3 mb-1 text-sm font-semibold;
 }
 
-/* @rk/ui playground primitives. */
+/* Shared @rk/ui component styles. */
 .ui-button {
   @apply border-border bg-background hover:bg-accent focus-visible:outline-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2;
 }

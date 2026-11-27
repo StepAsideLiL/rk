@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import { UiPage } from "./ui-page";
+import { UiPage } from "../components/ui-page";
 
 type ComponentGroup = {
   name: string;
@@ -55,7 +55,7 @@ const count = groups.reduce((total, group) => total + 1 + group.parts.length, 0)
 const cardClass =
   "border-border bg-card text-card-foreground hover:bg-accent focus-visible:outline-ring flex h-full flex-col gap-3 rounded-lg border p-5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2";
 
-export function ReactComponentsPage() {
+export default function ReactComponentsPage() {
   return (
     <UiPage
       title="React components"

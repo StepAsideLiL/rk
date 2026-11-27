@@ -1,8 +1,8 @@
 import { Button } from "@rk/ui/react";
 
-import { UiPage } from "./ui-page";
+import { UiPage } from "../components/ui-page";
 
-export function ButtonPage() {
+export default function ButtonPage() {
   return (
     <UiPage
       title="Button"

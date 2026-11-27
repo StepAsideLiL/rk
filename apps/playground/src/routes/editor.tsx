@@ -23,7 +23,7 @@ const htmlContent = `<h1>rk editor</h1>
 
 type InputFormat = "markdown" | "html";
 
-export function EditorPage() {
+export default function EditorPage() {
   const [inputFormat, setInputFormat] = useState<InputFormat>("markdown");
   const content = inputFormat === "markdown" ? markdownContent : htmlContent;
   const editor = useEditor({

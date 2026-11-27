@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@rk/ui/react";
 
-import { UiPage } from "./ui-page";
+import { UiPage } from "../components/ui-page";
 
 function XIcon() {
   return (
@@ -25,7 +25,7 @@ function XIcon() {
   );
 }
 
-export function DialogPage() {
+export default function DialogPage() {
   return (
     <UiPage
       title="Dialog"

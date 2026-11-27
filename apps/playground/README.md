@@ -8,10 +8,19 @@ Playground app for testing, experimenting, and viewing UI in the rk monorepo. Re
 pnpm --filter @rk/playground dev
 ```
 
-## Pages
+## Routes
 
-- `/` — lists the pages available in the playground.
+Routes are file-based under `src/routes/`, resolved by `@react-router/fs-routes`
+from `src/routes.ts`. Dots in file names become URL path segments, and `_index`
+marks an index route.
+
+- `/` — lists the pages available in the playground (`_index.tsx`).
 - `/editor` — interactive demo for `@rk/editor` with a Markdown/HTML input-format switcher and live output panels.
+- `/ui/react` — index of the `@rk/ui/react` components.
+- `/ui/react/button`, `/ui/react/dialog`, `/ui/react/h-column`, `/ui/react/sidebar` — component demos.
+
+The app runs in React Router framework mode with SPA rendering (`ssr: false`),
+configured in `react-router.config.ts`.
 
 ## Theme
 

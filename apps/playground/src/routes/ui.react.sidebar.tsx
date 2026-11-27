@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContainer, SidebarToggleButton } from "@rk/ui/react";
 
-import { UiPage } from "./ui-page";
+import { UiPage } from "../components/ui-page";
 
 const items = ["Overview", "Projects", "Components", "Settings"];
 
@@ -17,7 +17,7 @@ function SidebarIcon() {
   );
 }
 
-export function SidebarPage() {
+export default function SidebarPage() {
   return (
     <UiPage
       title="Sidebar"

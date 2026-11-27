@@ -1,5 +1,5 @@
+import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 const editorSrc = decodeURIComponent(
@@ -7,8 +7,7 @@ const editorSrc = decodeURIComponent(
 ).replace(/^\/([a-zA-Z]:)/, "$1");
 
 export default defineConfig({
-  root: "src",
-  plugins: [react(), tailwindcss()],
+  plugins: [tailwindcss(), reactRouter()],
   resolve: {
     alias: [
       { find: /^@rk\/editor$/, replacement: `${editorSrc}index.ts` },

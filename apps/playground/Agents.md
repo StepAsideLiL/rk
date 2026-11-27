@@ -10,7 +10,10 @@ monorepo.
   `pnpm --filter @rk/playground dev`.
 - Local scripts: `dev`, `lint`, `lint:fix`, `typecheck`. There is no `build` or
   `test` script.
-- Vite root is `src`, so `src/index.html` is the entry document.
+- React Router framework mode runs with `ssr: false` (SPA);
+  `react-router.config.ts` sets `appDirectory` to `src`.
+- `src/routes.ts` enables file routes with `@react-router/fs-routes`
+  (`flatRoutes`), so files in `src/routes/` map to URLs.
 - `@rk/editor` resolves to `packages/editor/src` through Vite and TypeScript
   aliases, so this app runs without building the editor package first.
 - Shared dependency versions come from the workspace `catalog` in
@@ -21,27 +24,32 @@ monorepo.
 
 ## Layout
 
-- `src/app.tsx` defines the React Router routes.
-- `src/pages/` contains route pages, including the home page, the `/editor`
-  demo, and the `/ui/react/*` component demos.
-- `src/components/app-shell.tsx` provides the shared app frame.
+- `src/root.tsx` is the root route and document shell; it renders
+  `src/components/app-shell.tsx`.
+- `src/routes.ts` exports the `flatRoutes()` config from
+  `@react-router/fs-routes`.
+- `src/routes/` holds file routes: `_index.tsx` is `/`, dots become path
+  segments (`ui.react.button.tsx` is `/ui/react/button`), and `_index` marks an
+  index route.
+- `src/components/` holds shared UI such as the app frame and `ui-page.tsx`.
 - `src/utils/theme.ts` holds theme detection and the keyboard toggle.
 - `src/global.css` defines the Tailwind import, shadcn-style oklch tokens,
   `@theme` utilities, and playground-only component styles.
-- `src/main.tsx` mounts the app, and `src/index.html` is the Vite entry page.
-- `vite.config.ts` configures the Vite root and editor source aliases;
-  `tsconfig.json` mirrors those aliases for typechecking.
+- `react-router.config.ts` enables SPA mode and points the app directory at
+  `src`; `vite.config.ts` wires the React Router and Tailwind plugins plus the
+  editor source aliases. `tsconfig.json` mirrors those aliases for typechecking.
 - `README.md` documents the available pages and theme behavior.
 
 ## Rules
 
-- Add routes in `src/app.tsx` and pages under `src/pages/`. Keep the home page
-  listing the available demos.
+- Add routes as files under `src/routes/` following the flat-routes convention;
+  do not add a manual route table. Keep the home page listing the available
+  demos.
 - Keep the editor demo at `/editor` working with both Markdown and HTML input
   modes, including the live output panels.
 - Import packages through their public entry points. The editor source alias is
   for local development; do not reach into other package internals.
-- Use `@rk/ui` exports for UI demos under `src/pages/ui/react/`.
+- Use `@rk/ui` exports for UI demos under `src/routes/ui.react.*`.
 - Keep theme tokens and Tailwind setup in `src/global.css`. Use the existing
   utilities (`bg-background`, `text-foreground`, ...) instead of hard-coded
   colors.
@@ -53,8 +61,8 @@ monorepo.
 
 ## Building and checking
 
-- `pnpm --filter @rk/playground dev` starts the Vite dev server.
-- `pnpm --filter @rk/playground typecheck` checks the app and Vite config.
+- `pnpm --filter @rk/playground dev` starts React Router's Vite dev server.
+- `pnpm --filter @rk/playground typecheck` checks the app and config files.
 - `pnpm --filter @rk/playground lint` applies Oxlint/Oxfmt fixes, then checks
   the package.
 - There is no test or build script. Verify changes in the dev server, including

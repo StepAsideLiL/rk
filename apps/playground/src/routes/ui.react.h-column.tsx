@@ -1,6 +1,6 @@
 import { HColumn, HColumnCell } from "@rk/ui/react";
 
-import { UiPage } from "./ui-page";
+import { UiPage } from "../components/ui-page";
 
 const cells = [
   { label: "Default", h: "start", v: "stretch" },
@@ -8,7 +8,7 @@ const cells = [
   { label: "end / bottom", h: "end", v: "bottom" },
 ] as const;
 
-export function HColumnPage() {
+export default function HColumnPage() {
   return (
     <UiPage
       title="HColumn"

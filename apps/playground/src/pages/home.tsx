@@ -7,6 +7,31 @@ const pages = [
     description:
       "Extensible ProseMirror editor with bold, italic, headings and live Markdown and HTML output.",
   },
+  {
+    to: "/ui/react",
+    title: "React components",
+    description: "Index of every component exported by @rk/ui/react.",
+  },
+  {
+    to: "/ui/react/button",
+    title: "Button",
+    description: "A button with a built-in tooltip that only appears when a tooltip is given.",
+  },
+  {
+    to: "/ui/react/sidebar",
+    title: "Sidebar",
+    description: "A resizable sidebar that collapses to 0 width from its toggle button.",
+  },
+  {
+    to: "/ui/react/dialog",
+    title: "Dialog",
+    description: "A dialog with a header, body and footer that keeps its aspect ratio.",
+  },
+  {
+    to: "/ui/react/h-column",
+    title: "HColumn",
+    description: "A horizontal column layout with horizontal and vertical cell alignment.",
+  },
 ] as const;
 
 export function HomePage() {

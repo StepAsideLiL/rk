@@ -15,6 +15,7 @@
   "scripts": {
     "lint": "pnpm run lint:fix && oxlint && oxfmt --check",
     "lint:fix": "oxlint --fix && oxfmt --write",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -23,7 +24,8 @@
   },
   "devDependencies": {
     "oxfmt": "catalog:",
-    "oxlint": "catalog:"
+    "oxlint": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:",

@@ -126,3 +126,111 @@
 .ProseMirror h6 {
   @apply mt-3 mb-1 text-sm font-semibold;
 }
+
+/* @rk/ui playground primitives. */
+.ui-button {
+  @apply border-border bg-background hover:bg-accent focus-visible:outline-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.ui-button-primary {
+  @apply border-primary bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+[data-slot="button-content"] {
+  @apply bg-primary text-primary-foreground rounded-md px-2.5 py-1.5 text-xs leading-none font-medium shadow-lg;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 120ms ease-out,
+    scale 120ms ease-out;
+}
+
+[data-slot="button-content"]:is([data-starting-style], [data-ending-style]) {
+  opacity: 0;
+  scale: 0.95;
+}
+
+.ui-sidebar {
+  @apply bg-muted/40 border-r;
+}
+
+.ui-sidebar-toggle {
+  @apply text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-ring m-2 flex size-9 shrink-0 items-center justify-center self-start rounded-md focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.ui-sidebar-container {
+  width: var(--sidebar-width);
+  transition: width 160ms ease;
+  overflow: hidden;
+}
+
+[data-slot="sidebar"] [data-collapsed] {
+  transition: width 160ms ease;
+}
+
+[data-slot="sidebar-handle"] {
+  @apply bg-border/60 hover:bg-ring/60 focus-visible:outline-ring relative w-2 shrink-0 cursor-col-resize touch-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+[data-slot="dialog-backdrop"] {
+  @apply bg-black/50;
+}
+
+.ui-dialog-content {
+  @apply bg-card text-card-foreground border-border flex flex-col overflow-hidden rounded-xl border shadow-2xl;
+  width: min(90vw, 900px);
+  max-height: 85vh;
+  aspect-ratio: var(--dialog-ratio, auto);
+}
+
+.ui-dialog-header {
+  @apply border-border flex shrink-0 items-start justify-between gap-4 border-b px-6 py-4;
+}
+
+.ui-dialog-title {
+  @apply text-xl font-semibold tracking-tight;
+}
+
+.ui-dialog-close {
+  @apply text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-ring -m-2 flex size-8 shrink-0 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.ui-dialog-body {
+  @apply min-h-0 flex-1 overflow-y-auto px-6 py-5;
+}
+
+.ui-dialog-footer {
+  @apply border-border bg-muted/30 flex shrink-0 items-center justify-end gap-2 border-t px-6 py-3;
+}
+
+.ui-h-column {
+  @apply flex gap-4;
+}
+
+.ui-h-column-cell {
+  @apply bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-col gap-1 rounded-lg;
+}
+
+.ui-h-column-cell[data-h="start"] {
+  align-items: flex-start;
+}
+.ui-h-column-cell[data-h="center"] {
+  align-items: center;
+}
+.ui-h-column-cell[data-h="end"] {
+  align-items: flex-end;
+}
+.ui-h-column-cell[data-h="stretch"] {
+  align-items: stretch;
+}
+.ui-h-column-cell[data-v="top"] {
+  justify-content: flex-start;
+}
+.ui-h-column-cell[data-v="center"] {
+  justify-content: center;
+}
+.ui-h-column-cell[data-v="bottom"] {
+  justify-content: flex-end;
+}
+.ui-h-column-cell[data-v="stretch"] {
+  justify-content: normal;
+}
